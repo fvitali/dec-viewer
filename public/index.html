@@ -1,0 +1,430 @@
+<!--
+Copyright (c) 2025 Fabio Vitali
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DEC Viewer</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">	
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="viewer.css">
+	<script src="config.js"></script>
+
+</head>
+<body>
+	<!-- Header -->
+	<header class="text-bg-info pt-2">
+		<nav class="d-flex justify-content-between align-items-center">
+			<a href="/" class="p-2 link-body-emphasis text-decoration-none">
+				<span class="navbar-brand fs-4">DEC Viewer</span>
+			</a>		
+			<ul class="nav nav-pills pt-2">
+				<li class="nav-item">
+					<a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#prefixesModal">Prefixes</a>
+				</li>
+				<li class="nav-item">
+					<a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#labelsModal">Labels</a>
+				</li>
+				<li class="nav-item">
+					<a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#infoModal">
+						<i class="bi bi-question-circle"></i>
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</header>
+
+	<!-- Main Content -->
+	<main class="d-flex">
+	<div class="accordion-container col-6 border-end overflow-hidden">
+		<div class="accordion" id="leftAccordion">
+		<!-- Info Section -->
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="infoHeading">
+			<button class="accordion-button collapsed" id="infoButton" type="button" data-bs-toggle="collapse" data-bs-target="#infoCollapse" aria-expanded="true" aria-controls="infoCollapse">
+				Info
+			</button>
+			</h2>
+			<div id="infoCollapse" class="accordion-collapse collapse" aria-labelledby="infoHeading" data-bs-parent="#leftAccordion">
+			<div class="accordion-body" id="infoContent">Loading...</div>
+			</div>
+		</div>
+
+		<!-- Examples Section -->
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="examplesHeading">
+			<button class="accordion-button collapsed"	id="exampleButton"	type="button" data-bs-toggle="collapse" data-bs-target="#examplesCollapse" aria-expanded="false" aria-controls="examplesCollapse">
+				Examples
+			</button>
+			</h2>
+			<div id="examplesCollapse" class="accordion-collapse collapse ps-3" aria-labelledby="examplesHeading" data-bs-parent="#leftAccordion">
+			<div class="accordion-body" id="examplesContent"><h1>Loading...</h1></div>
+			</div>
+		</div>
+
+		<!-- Update Section -->
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="updateHeading">
+			<button class="accordion-button collapsed"	id="addDataButton"	type="button" data-bs-toggle="collapse" data-bs-target="#updateCollapse" aria-expanded="false" aria-controls="updateCollapse">
+				Add Data
+			</button>
+			</h2>
+			<div id="updateCollapse" class="accordion-collapse collapse show" aria-labelledby="updateHeading" data-bs-parent="#leftAccordion">
+			<div class="accordion-body d-flex flex-column pt-1">
+				<p class="small text-muted m-0" id="updateLabel">Append RDF data to the dataset in SPARQL Update format.</p>
+				<pre class="m-0">INSERT DATA {</pre>
+				<textarea id="updateTextarea" class="form-control w-90 ms-2 me-1" rows="10"></textarea>
+				<pre class="m-0">}</pre>
+				<div class="d-flex mb-2 mt-2" id="updateButtons">
+				<button id="undoButton" class="btn btn-sm btn-secondary me-auto">
+					<i class="bi bi-arrow-counterclockwise"></i> Undo
+				</button>
+				<div class="form-check form-switch me-auto">
+					<input class="form-check-input clearDatasetCheckbox" type="checkbox" id="clearDatasetCheckbox" checked>
+					<label class="form-check-label" for="clearDatasetCheckbox">Clear dataset first</label>
+				</div>
+				<button id="updateButton" class="btn btn-sm btn-primary">Add Data</button>
+				</div>
+			</div>
+			</div>
+		</div>
+
+		<!-- SPARQL Section -->
+		<div class="accordion-item">
+			<h2 class="accordion-header" id="queryHeading">
+			<button class="accordion-button collapsed"	id="sparqlButton" type="button" data-bs-toggle="collapse" data-bs-target="#queryCollapse" aria-expanded="false" aria-controls="queryCollapse">
+				SPARQL
+			</button>
+			</h2>
+			<div id="queryCollapse" class="accordion-collapse collapse" aria-labelledby="queryHeading" data-bs-parent="#leftAccordion">
+			<div class="accordion-body d-flex flex-column">
+				<textarea id="queryTextarea" class="form-control w-100 mb-2" rows="10"></textarea>
+				<button id="queryButton" class="btn btn-primary w-100">Query</button>
+			</div>
+			</div>
+		</div>
+		</div>
+	</div>
+
+	<!-- Tab Panel and Navbar -->
+	<div class="tab-content-container col-6 d-flex flex-column">
+		<nav class="navbar bg-light p-2 mb-2">
+			<div class="d-flex flex-column ms-4 justify-content-center" title="Does not apply to raw output">
+				<div class="text-center">Identifiers</div>
+				<div class="slider-container">
+					<input type="range" min="0" max="2" step="1" value="0" class="form-range" id="renderStyleSlider">
+					<div class="slider-labels">
+						<span>Full</span>
+						<span>Prefixes</span>
+						<span>Labels</span>
+					</div>
+				</div>	
+			</div>
+			<div class="d-flex flex-column me-4 justify-content-center" title="Does not apply to raw output">
+				<div class="text-center">Filters</div>
+				<div class="slider-container me-4">
+					<input type="range" min="0" max="2" step="1" value="0" class="form-range" id="filterSlider">
+					<div class="slider-labels">
+						<span>None</span>
+						<span>Schema</span>
+						<span>Shared</span>
+					</div>
+				</div>
+			</div>
+		</nav>
+
+		<!-- Tabs -->
+		<ul class="nav nav-tabs nav-fill">
+		<li class="nav-item">
+			<button class="nav-link active" id="raw-tab-button" data-bs-toggle="tab" data-bs-target="#rawContentContainer" type="button" role="tab">
+			Raw
+			</button>
+		</li>
+		<li class="nav-item" id="bindings-tab">
+			<button class="nav-link" id="bindings-tab-button" data-bs-toggle="tab" data-bs-target="#bindingsContentContainer" type="button" role="tab">
+			Tabled
+			</button>
+		</li>
+		<li class="nav-item">
+			<button class="nav-link" id="grouped-bindings-tab-button" data-bs-toggle="tab" data-bs-target="#groupedBindingsContentContainer" type="button" role="tab">
+				Grouped
+			</button>
+		</li>
+		</ul>
+
+		<div class="tab-content flex-grow-1 p-2 overflow-auto">
+		<div class="tab-pane fade show active" id="rawContentContainer" role="tabpanel">
+			<pre id="rawOutput" class="m-0">Raw Output content will appear here.</pre>
+		</div>
+		<div class="tab-pane fade" id="bindingsContentContainer" role="tabpanel">
+			<p class="explanation"></p>
+			<div id="bindingsContent"></div>
+		</div>
+		<div class="tab-pane fade" id="groupedBindingsContentContainer" role="tabpanel">
+			<p class="explanation"></p>
+			<div id="groupedBindingsContent"></div>
+		</div>
+		</div>
+	</div>
+	</main>
+
+	<footer><p id="footerText">Loading...</p></footer>
+
+	<!-- Prefixes Modal -->
+	<div class="modal" id="prefixesModal" tabindex="-1" aria-labelledby="prefixesModalLabel" aria-hidden="true" data-bs-focus="false">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title" id="prefixesModalLabel">Prefixes</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+			<textarea id="prefixesTextarea" class="form-control w-100" rows="10"></textarea>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="prefixesModalClose">Close</button>
+		</div>
+		</div>
+	</div>
+	</div>
+
+	<!-- Labels Modal -->
+	<div class="modal" id="labelsModal" tabindex="-1" aria-labelledby="labelsModalLabel" aria-hidden="true" data-bs-focus="false">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title" id="labelsModalLabel">Labels</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+			<textarea id="labelsTextarea" class="form-control w-100" rows="10"></textarea>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="labelsModalClose">Close</button>
+		</div>
+		</div>
+	</div>
+	</div>
+
+	<!-- Info Modal -->
+	<div class="modal" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true" data-bs-focus="false">
+	<div class="modal-dialog">
+		<div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title">About DEC Viewer</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		</div>
+		<div class="modal-body">
+			DEC Viewer is a web application to visualize and analyze SPARQL query results efficiently.
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		</div>
+		</div>
+	</div>
+	</div>
+
+	<!-- Templates -->
+	<script id="exampleTemplate" type="text/x-handlebars-template">
+		{{#each examples}}
+		<div class="mb-3">
+			<button class="btn btn-link main-header d-block w-100 text-start" data-bs-toggle="collapse" data-bs-target="#example{{@index}}">
+			{{header}}
+			</button>
+			<div class="collapse main-collapse" id="example{{@index}}">
+			{{#each content}}
+				<div class="ms-3 mb-2">
+				<button class="btn btn-link sub-header" data-bs-toggle="collapse" data-bs-target="#example{{@../index}}-sub{{@index}}">
+					{{header}}
+				</button>
+				<div class="collapse sub-collapse ms-3" id="example{{@../index}}-sub{{@index}}">
+					{{content}}
+				</div>
+				</div>
+			{{/each}}
+			</div>
+		</div>
+		{{/each}}
+	</script>
+	
+	<script id="bindingsTableTemplate"	type="text/x-handlebars-template">
+		<p class="summary">Showing {{filtered}} results out of {{total}}.</p>
+		<table id="bindingsTable" class="table table-striped">
+			<thead>
+			<tr>
+				<th>#</th>
+				<th class="sortable" title="Click to sort by graph - first click ascending, second click descending">graph</th>
+				<th class="sortable" title="Click to sort by subject - first click ascending, second click descending">s</th>
+				<th class="sortable" title="Click to sort by predicate - first click ascending, second click descending">p</th>
+				<th class="sortable" title="Click to sort by object - first click ascending, second click descending">o</th>
+			</tr>
+			</thead>
+			<tbody>
+			{{#each rows}}
+				<tr class="{{join this.dec}}">
+					<td>{{addOne @index}}</td>
+					<td>{{render this.graph.value}}</td>
+					{{#if (eq (typeof this.s.value) "string")}}
+						<td>{{render this.s.value}}</td>
+					{{else}}
+						<td class="triple {{allValues this.dec}}">
+							<span class="s">{{render this.s.value.subject.value}}</span>
+							<span class="p">{{render this.s.value.predicate.value}}</span>
+							<span class="o">{{render this.s.value.object.value}}</span>
+						</td>
+					{{/if}}
+					<td>{{render this.p.value}}</td>
+					{{#if (eq (typeof this.o.value) "string")}}
+						<td>{{render this.o.value}}</td>
+					{{else}}
+						<td class="triple {{allValues this.dec}}">
+							<span class="s">{{render this.o.value.subject.value}}</span>
+							<span class="p">{{render this.o.value.predicate.value}}</span>
+							<span class="o">{{render this.o.value.object.value}}</span>
+						</td>
+					{{/if}}
+				</tr>
+			{{/each}}
+			</tbody>
+		</table>
+	</script>
+	
+	<script id="groupedBindingsTemplate" type="text/x-handlebars-template">
+		<p class="summary">Showing {{filtered}} results out of {{total}}, organized in {{groupCount}} graphs.</p>
+		{{#eachSorted groups}}
+			<div class="group {{allValues this.dec}}">
+				<div class="header meta-info">
+					{{#eachSorted this.meta}}
+							{{#if (neq @key "dec")}}
+								<div class="statement {{allValues this.dec}}">
+										<span class="subject">{{render @key}}</span>
+										{{#each this}}
+											{{#if (neq @key "dec")}}
+												<span class="predicate {{allValues this.dec}}">{{render @key}}
+													{{#each v}}
+														<span class="object {{allValues this.dec}}">{{render this.v}}</span>{{#unless @last}},{{/unless}}
+													{{/each}}
+												</span>
+											{{/if}}
+										{{/each}}
+								</div>
+							{{/if}}
+					{{/eachSorted}}
+				</div>
+				<p class="header">
+					{{#if (neq @key "<default>")}}
+						{{render @key}} contains 
+						<a href="#" 
+						data-bs-toggle="collapse" 
+						data-bs-target="#group-{{@key}}">{{count this}} statements</a>
+					{{ else }}
+						There are 
+						<a href="#" 
+						data-bs-toggle="collapse" 
+						data-bs-target="#group-{{@key}}">{{count this}} facts</a>
+					{{/if}}
+				</p>
+				<div id="group-{{@key}}" class="collapse show graph {{allValues this.dec}}" title="{{allValues this.dec}}" border="1">
+					<ul>
+					{{#each this.content}}
+						{{#if (neq @key "dec")}}
+							<li class="statement {{allValues this.dec}}">
+									<span class="subject">{{render @key}}</span>
+									{{#each this}}
+										{{#if (neq @key "dec")}}
+											<span class="predicate {{allValues this.dec}}">{{render @key}}
+												{{#each v}}
+													{{#if (eq (typeof this.v) "string")}}
+														<span class="object {{allValues this.dec}}">{{render this.v}}</span>
+														{{#unless @last}},{{/unless}}
+													{{else}}
+														<span class="triple {{allValues this.dec}}">
+															<span class="s">{{render this.v.subject.value}}</span>
+															<span class="p">{{render this.v.predicate.value}}</span>
+															<span class="o">{{render this.v.object.value}}</span>
+														</span>
+													{{/if}}
+												{{/each}}
+											</span>
+										{{/if}}
+									{{/each}}
+							</li>
+						{{/if}}
+					{{/each}}
+					</ul>
+				</div>
+			</div>
+		{{/eachSorted}}
+	</script>
+
+	<script id="oldGroupedBindingsTemplate" type="text/x-handlebars-template">
+		<p class="summary">Showing {{filtered}} results out of {{total}}, organized in {{groupCount}} graphs.</p>
+		<ul>
+		{{#eachSorted groups}}
+			<li class="group">
+				<p class="header">
+					graph {{render @key}} contains 
+					<a href="#" 
+						data-bs-toggle="collapse" 
+						data-bs-target="#group-{{@key}}">{{count this}} statements</a>
+				</p>
+				<div id="group-{{@key}}" class="collapse show graph {{allValues this.dec}}" title="{{allValues this.dec}}" border="1">
+					<div class="label">{{allValues this.dec}}</div>
+					<ul>
+					{{#each this}}
+						{{#if (neq @key "dec")}}
+							<li class="statement {{allValues this.dec}}"><div class="subject-group"> 
+								<span class="subject">{{render @key}}</span>
+								{{#each this}}
+									{{#if (neq @key "dec")}}
+										<span class="predicate {{allValues this.dec}}">{{render @key}}
+											{{#each v}} <!-- object -->
+												<span class="object {{allValues this.dec}}">{{render this.v}}</span>{{#unless @last}},{{/unless}}
+											{{/each}}
+										</span>
+									{{/if}}
+								{{/each}}
+							</div></li>
+						{{/if}}
+					{{/each}}
+					</ul>
+				</div>
+			</li>
+		{{/eachSorted}}
+		</ul>
+	</script>
+
+
+
+	<script id="errorTemplate" type="text/x-handlebars-template">
+		<div class="error">
+			<h2>{{error}}</h2>
+			<p>{{message}}</p>
+		</div>
+	</script>
+
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.7/dist/handlebars.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.6/marked.min.js"></script>
+	<script src="main.js" type="module"></script>
+	<script src="ui.js" type="module"></script>
+</body>
+</html>

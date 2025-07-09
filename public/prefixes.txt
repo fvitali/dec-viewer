@@ -1,0 +1,13 @@
+owl http://www.w3.org/2002/07/owl#
+rdf http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs http://www.w3.org/2000/01/rdf-schema#
+xsd http://www.w3.org/2001/XMLSchema#
+r urn:x-hp-jena:rubrik/​
+
+dbo http://dbpedia.org/ontology/
+prov http://www.w3.org/ns/prov#
+<empty> http://example.org/empty/
+ex http://example.org/
+zoo http://zoology.example.org/
+disagreement http://dec.fabiovitali.it/disagreements/
+dec http://dec.fabiovitali.it/

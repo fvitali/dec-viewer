@@ -1,0 +1,39 @@
+<!--
+Copyright (c) 2025 Fabio Vitali
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+<h1>DEC Viewer and DEC Reasoner</h1>
+
+<p>DEC Viewer is a web application providing access to a DEC reasoner over a quad store using Fuseki 4.8.0. </p>
+
+<h2>DEC modal logics</h2>
+<p>DEC stands for Doxastic, Epistemic, and Conjectural, three types of modal logic meant to characterize the subjective state of mind of one or more actors holdings beliefs, concepts and hypothesis over reality, such as "Alice believes that John is a painter" or "Bruce knows that painters are artists." or "Catherine supposes John painted 'Still life #13'." The DEC Reasoner is able to carry out inferences on objective and subjective assertions expressed in RDF. </p>
+
+<p>Doxastic, Epistemic and Conjectural are only three (although, arguably, the most significant) reasoning models supported by the DEC Reasoner, but in the current implementation we actuallu support nine of them. These models are distinguished by how they address objective and subjective statements, according to one or more axioms used in modal logic. This in turn corresponds to different types of subjective states and their impact on reality and with other states:</p>
+
+<ul>
+	<li><b>Verbatim model</b>: this is meant to represent statements exactly as expressed, with no inferences carried out. A reasonable governing verb is "say": if someone says something, she says exactly this, and not anything further that can be logically implicated by her sentences. Therefore objective statements are exposed to inferences as usual, while subjective statements are not processed and remain unchanged.</li>
+	<li><b>Doxastic model</b>: this is meant to represent subjective stances that are independent of reality, and possibly in contrast with it. This includes beliefs, opinions or delusions. The usual governing verb is "believe" or "think": when someone believes something, that something may or may not be actually true, but she (being a rational actors) must believe also everything that can be logically implicated by this. Therefore objective statements are exposed to inferences as usual and are considered objective as well, and so are subjective statements, whose inferences are then added as subjective statements as well. </li>
+	<li><b>Epistemic model</b>: this is meant to represent subjective stances that are part of reality, and never in contrast with it. This includes knowledge, discoveries, judgments. The usual governing verb is "know" or "decide": when someone knows something, that something must be actually true, and she (being a rational actors) must believe also everything that can be logically implicated by this, which also happen to be true. On the other hand, she might know fewer things than reality. Therefore subjective statements are exposed to inferences as usual and are considered subjective as well, but are all then added and considered part of the set of objective statements which are then exposed to inferences as usual.</li>
+	<li><b>Conjectural model</b>: this is meant to represent subjective stances that are based reality, and never in contrast with it, but that suppose something in addition which reality does not consider. This includes conjectures, hypothesis and suppositions. The usual governing verb is "suppose" or "conjecture": when someone suppose something, that something is not known to be neither true nor false, but she (being a rational actors) must consider in the supposition also everything that is known to be true. Thus a conjecture includes everything that is known to be true, plus some more that (at the moment) is not. Therefore objective statements are intermingled with subjective ones and exposed to inferences as part of the supposition, and separately objective statements are also exposed to inference as usual. </li>
+	<li><b>Nirvana model</b>: this is meant to represent a fictional situation in which someone is "one with the universe" (i.e., in Nirvana): there is no distinction between subjective and objective stances: what is real is subjective, and what is subjective is objective. A reasonable governing verb could be "grok" or "attain awareness about". Subjective and objective statements are mingled together, inferences are carried out on the union of the two, and shared equally as subjective and objective at the same time.</li>
+	<li><b>Union graph</b>: Similarly to Nirvana, this model joins outer and inner statements in a single unione graph, and carries out inferences on it. Resulting inferences are considered </b>
+	<li><b>Colored graphs</b>: 
+</ul>
+
+<p>In addition to 
+    
+    
+<h2>DEC Reasoner</h2>    
+<p>The DEC Reasoner operates on subjective statements expressed in either RDF reified triples, rdf* triples, or named graphs, and uses for the actual inferencing another reasoner, e.g. an OWL or RDFS reasoner, which can be configured as a parameter of the DEC Reasoner (this installation uses a full OWL reasoner). Objective statements are processed as usual through the base reasoner, and the DEC Reasoner does not modify this behavior.</p>

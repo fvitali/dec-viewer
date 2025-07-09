@@ -1,0 +1,652 @@
+/*
+Copyright (c) 2025 Fabio Vitali
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+:root {
+    --header-height: 70px;
+    --footer-height: 50px;
+    --num-of-accordions: 4;
+    --main-height: calc(100vh - var(--header-height) - var(--footer-height));
+    --accordion-header-height: 2rem;
+    --collapse-height: calc(var(--main-height) - (var(--num-of-accordions) * var(--accordion-header-height)));
+    --bs-body-font-family: "Roboto", Verdana, Geneva, Tahoma, sans-serif;
+    --bs-font-monospace: "Source Code Pro", monospace;
+    --bs-body-font-size: 12pt;
+}
+
+:root {
+    /* https://coolors.co/palettes/popular/6%20colors */
+    --light-coral: #ec8a83;
+    --atomic-tangerine: #ffad85;
+    --maize: #f9f176;
+    --light-green: #8be59d;
+    --argentinian-blue: #6ab4f1ff;
+    --lavender-floral: #a983d8ff;
+    --lavender-floral-light: #d8c8f8;
+    --transparent-light: #ffffff99;
+
+
+    --normal-font-color: #333333;
+    --inverse-font-color: #ffffff;
+    --normal-color: var(--maize);
+    --shared-color: var(--transparent-light);
+    --verbatim-color: var(--light-coral);
+    --doxastic-color: var(--atomic-tangerine);
+    --epistemic-color: var(--light-green);
+    --conjectural-color: var(--lavender-floral-light);
+    --schema-color: var(--argentinian-blue);
+    --schema-font-color: var(--inverse-font-color);
+
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+header {
+    height: var(--header-height);
+}
+
+footer {
+    height: var(--footer-height);
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #dee2e6;
+}
+
+main {
+    height: var(--main-height);
+    display: flex;
+}
+
+.accordion-container {
+    height: 100%;
+    overflow-y: auto;
+    border-right: 1px solid #dee2e6;
+}
+
+.tab-content-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tab-content-container .nav-tabs {
+    flex-shrink: 0;
+}
+
+.tab-content-container .tab-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+#infoContent h1 {
+    font-size: 120%;
+    font-weight: bold; 
+}
+
+#infoContent h2 {
+    font-size: 110%;
+    font-weight: bold; 
+}
+
+#infoContent * {
+    font-size: 10pt;
+}
+
+#queryTextarea, #updateTextarea {
+    width: 100%;
+    font-size: smaller; 
+    font-family: monospace;
+    line-height: 1.2em; 
+}
+
+.query-error {
+    color: red;
+    margin-top: 5px;
+}
+
+.group:has(.collapse):not([data-count="1"]) {
+    --introduction-text: attr(data-count) ' statements';
+}
+
+.group:has(.collapse.show)[data-count="1"] {
+    --introduction-text: attr(data-count) ' statement';
+}
+
+.group:has(.collapse.show)[data-count="1"] {
+    --introduction-text: 'this statement';
+}
+
+.group:has(.collapse.show):not([data-count="1"]) {
+    --introduction-text: 'these ' attr(data-count) ' statements';
+}
+
+.group {
+    margin-top: 1em; 
+}
+
+.group .header {
+    margin-bottom: 0em; 
+}
+
+.group .subject {
+    margin: 0px; 
+}
+
+.graph {
+padding-block: 0.5em; 
+padding-inline: 0.5em;
+
+}
+.graph ul {
+    margin: 0px; 
+    padding: 0px;  
+}
+
+.group .subject:before {
+    content: attr(data-type) ' ' attr(data-name);
+    display: block;
+    text-align: right;
+    color: black;
+    font-size: 0.65rem;
+    padding-right: 1em;
+    position: relative;
+    top: -1.6em;
+    height: 0px;
+}
+
+.group .label {
+    position: relative;
+    font-size: 85%;
+    font-style: italic;
+    top: -1.25em;
+    margin-left: auto;
+    width: fit-content;
+    background-color: transparent;
+    padding-inline: 0.5em;
+}
+
+.group .graph  { background-color: var(--normal-color); }
+.triple.verbatimPredicate, .group.verbatimUniverse .graph { background-color: var(--verbatim-color); }
+.triple.doxasticPredicate, .group.doxasticUniverse .graph  { background-color: var(--doxastic-color); }
+.triple.epistemicPredicate, .group.epistemicUniverse .graph  { background-color: var(--epistemic-color); }
+.triple.conjecturalPredicate, .group.conjecturalUniverse .graph  { background-color: var(--conjectural-color); }
+.triple.sharedPredicate, .group.sharedUniverse .graph  { 
+    background: var(--maize);
+    background: color-mix(in srgb, var(--transparent-light), var(--maize) );
+}
+.sharedUniverse {
+    background-color: var(--shared-color);
+}
+.statement.sharedUniverse *, .predicate.sharedUniverse * {
+    background-color: transparent !important;
+}
+
+.group .statements {
+    border-collapse: collapse; 
+    width: 80%;
+}
+
+.group .statements th, .group .statements td {
+    border: 1px solid darkgray;
+    padding: 3px;
+    width: 25% !important; 
+}
+
+
+
+#bindingsContent {
+    max-height: 50vh;
+}
+
+#bindingsContent table {
+    width: 50vw;
+    font-size: 0.9rem;
+    font-family: var(--bs-font-monospace);
+    height: 100%;
+    overflow-y: hidden;
+}
+
+#bindingsContent tbody {
+    overflow-y: auto;
+}
+
+#bindingsContent table th,
+#bindingsContent table td {
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.sortable {
+    cursor: pointer;
+}
+
+.empty-subject {
+    width: 8em;
+}
+
+#prefixesTextarea {
+    width: 100%;
+    min-height: 8em;
+}
+
+.no-borders {
+    border: none;
+}
+
+#xamplesContent {
+    padding: 0.5em;
+    height: 100%; 
+    font-size: 10pt; 
+    font-family: verdana; 
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    padding-block: -0.5em;
+}
+
+fv-collapse {
+  display: block;
+  padding-inline: 1em;
+}
+.collapse-section h3 {
+    margin: 0;
+    margin-top: 0.5em;   
+    font-size: 0.9em;
+}
+.collapse-section .collapse-toggle.collapsed {
+  font-weight: normal;
+  text-shadow: none;
+  letter-spacing: 0.06em;
+}
+.collapse-section .collapse-toggle {
+  font-weight: normal;
+  filter: contrast(200%);
+  text-shadow: 0 0 1px currentColor;
+  letter-spacing: 0.06em;
+  /* font-weight: bold; */
+}
+
+.sparql pre {
+    display: inline;
+    cursor: pointer;
+    font-size: smaller;
+    line-height: 1.2em; 
+}
+
+.sparql {
+    border: #cccccc 1px solid;
+    width: 100%;
+    padding: 0.5em;
+    max-height: 15em; 
+    overflow-y: auto; 
+    line-height: 0.9em;
+}
+
+.sparql .clearSwitch {
+    display: flex;
+    float: right;
+}
+
+.sparql .clearDatasetLabel {
+    margin: auto;
+    padding-left: 0.2em;
+    font-size: 0.8em;
+}
+.comment {
+    font-size: 0.8em;
+    color: gray;
+    font-style: italic;
+}
+
+.collapse .expect {
+    display: none;
+}
+.explanation {
+    color: blue;
+    font-style: italic;
+    margin-block: 0.5em;
+    font-size: 0.8em;
+}
+/* -------------------------------------- */
+/*                Collapses               */
+/* -------------------------------------- */
+
+.collapse-toggle {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.collapse-toggle::before {
+    content: '▶';
+    display: inline-block;
+    transition: transform 0.3s;
+    font-style: normal;
+    font-size: 0.9em;
+}
+
+.collapse-toggle.collapsed::before {
+    transform: rotate(0deg);
+}
+
+.collapse-toggle:not(.collapsed)::before {
+    transform: rotate(90deg);
+}
+
+.collapse {
+    display: none;
+}
+
+.collapse.show {
+    display: block;
+}
+
+/* -------------------------------------- */
+/*                Examples 2              */
+/* -------------------------------------- */
+#examplesContent2 {
+    padding: 0.5em;
+    height: 100%; 
+    font-size: 10pt; 
+    font-family: verdana; 
+}
+
+#examplesContent2 a {
+    border: none;
+    background-color: transparent;
+    color: inherit;
+    text-decoration: inherit;
+    font-size: inherit;
+}
+
+#examplesContent2 section {
+    margin-left: 2em;
+    margin-right: 1em;
+}
+
+#examplesContent2 pre {
+    cursor: pointer;
+    font-size: smaller;
+    padding: 0.5em;
+    line-height: 1.2em; 
+    max-height: 15em; 
+    overflow-y: auto; 
+    border: #cccccc 1px solid;
+    width: 100%;
+    display: block; 
+}
+
+#examplesContent2 h1 {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#examplesContent2 h2 {
+    font-size: 1.0em;
+    font-weight: bold;
+    padding-left: 0.5em; 
+}
+
+#examplesContent2 h3 {
+    font-size: 1.0em;
+    font-style: italic;
+}
+
+#examplesContent2 h4 {
+    font-size: 1.0em;
+}
+
+#examplesContent2 h5 {
+    font-size: 0.8em;
+    font-style: italic;
+}
+
+#examplesContent2 h5 + section {
+    font-size: 0.8em;
+}
+
+/* -------------------------------------- */
+/*                Accordions              */
+/* -------------------------------------- */
+
+.accordion-header {
+    margin-bottom: 0;
+    height: var(--accordion-header-height);
+    border-bottom: black;
+    display: flex;
+}
+
+.accordion-button {
+    padding: 0 var(--bs-accordion-btn-padding-x);
+}
+
+.accordion-collapse {
+    height: var(--collapse-height);
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.accordion-body.d-flex.flex-column {
+    height: 100%;
+}
+
+.filterOWL .filterable {
+    display: none;
+}
+
+/* -------------------------------------- */
+/*                Update/Query            */
+/* -------------------------------------- */
+
+#updateLabel, #updateButton, #queryButton {
+    flex-shrink: 0;
+}
+
+#updateTextarea, #queryTextarea {
+    flex-grow: 1;
+}
+
+#updateCollapse, #queryCollapse {
+    overflow: hidden;
+}
+
+/* -------------------------------------- */
+/*                Errors                  */
+/* -------------------------------------- */
+
+.error {
+    background-color: #ffe6e6; 
+    color: #d9534f; 
+    padding: 2em;
+}
+
+.error h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.error p {
+    font-size: 0.9em;
+}
+
+pre.error {
+    font-size: 0.75em;
+    white-space: pre-wrap;
+}
+
+/* -------------------------------------- */
+/*                SLIDER                  */
+/* -------------------------------------- */
+
+.slider-container {
+    position: relative;
+    width: 15em;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -0.5rem;
+    font-size: 0.8rem;
+    
+}
+
+.form-range {
+    --track-position: 50%;
+    height: 1.5rem;
+    padding: 0;
+    -webkit-appearance: none;
+    width: 100%;
+}
+
+.form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 1rem;
+    height: 1rem;
+    background: var(--bs-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -0.25rem; 
+
+}
+
+.form-range::-moz-range-thumb {
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--bs-primary);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Add snap points */
+.form-range::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, 
+        var(--bs-primary) 0%, 
+        var(--bs-primary) var(--track-position, 33.33%), 
+        var(--bs-gray-300) var(--track-position, 33.33%), 
+        var(--bs-gray-300) 100%);
+    height: 0.5rem;
+    border-radius: 0.25rem;
+    margin-top: 0.25rem 0; 
+}
+
+.statement {
+    display: grid;
+    grid-template-columns: auto 1fr 0.5em;
+    column-gap: 0.5em;
+    padding-bottom: 0em;
+}
+
+.render0 .statement, render0 .header {
+    font-size: 0.9rem;
+    font-family: var(--bs-font-monospace);
+    line-height: 1.2em;
+}
+
+.render1 .statement, .render1 .header {
+    font-size: 0.9rem;
+    font-family: var(--bs-font-monospace);
+    line-height: 1.2em;
+}
+
+.render2 .statement, .render2 .header {
+    font-size: 0.9rem;
+    line-height: 1.2em;
+    font-family: var(--bs-body-font-family);
+}
+
+.subject {
+    grid-column: 1;
+    grid-row: 1;
+    white-space: nowrap;
+}
+
+.predicate {
+    grid-column: 2;
+    font-weight: bold;
+}
+
+.predicate:has(.triple) {
+    display: grid; 
+    grid-template-columns: auto 1fr;
+}
+.statement:has(.triple) {
+    padding-block: 0.5em;
+}
+
+.object {
+    grid-column: 1;
+    display: inline-block;
+    font-weight: normal;
+}
+
+.triple {
+    grid-column: 2;
+    display: inline-block;
+    font-weight: normal;
+    margin-left: 0.5em;
+}
+
+.triple:before {
+    content: "<<";
+}
+
+.triple:after {
+    content: ">>";
+}
+
+.graph {
+    border: 1px solid #dee2e6;
+}
+
+
+.linkList {
+    float:right; 
+    display: inline-block; 
+    width: 50%; 
+    padding-left: 0.25em;
+    margin-left: 0.25em;
+    padding-block: 0.25em;
+    border: solid 1px gray;
+}
+
+.linkList ul {
+    padding: 0.5em;
+    list-style-position: inside;
+    margin: 0px;
+    font-size: 0.9em;
+}
+
+.linkList ul a {
+    color: black;
+    text-decoration: none;
+}
+

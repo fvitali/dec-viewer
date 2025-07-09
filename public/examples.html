@@ -1,0 +1,859 @@
+<!--
+Copyright (c) 2025 Fabio Vitali
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+-->
+
+        <p>Here you can find several examples of RDF sets exploring DEC modal reasoning for subjective states of minds and representation of disgreements, uncertainties and lies.</p>
+        <p>All these examples are available using named graphs, rdf star triples and reification triples.</p>
+
+        <fv-collapse id="reasoning" heading="DEC Reasoning">
+        <fv-collapse id="alphabet" heading="Alphabet" collapsed>
+            <p class="comment">Here you will find examples using classes with arbitrary names and exactly ONE 
+                individual (entityX) to explore in the simplest way the different types of reasoning affored by DEC universes. </p>
+                <fv-collapse id="alphabet-complete" heading="A1 - Complete example (named graphs)" collapsed>
+                    <p class="comment">
+                        There are several DEC graphs each ecploring a different type of DEC reasoning. 
+                        Graph g1 is shared knowledge and provides content for all graphs (except verbatim). 
+                        Graph g2 is verbatim, and does not interact with the other graphs and performs no inferences.
+                        Graph g3 is doxastic, does not interact with the other graphs but uses the shared knowledge and performs local inferences. 
+                        Graph g4 is epistemic, and generates true facts. It uses the shared knowledge, and all its inferences 
+                        permeate into the default graph. 
+                        Graph g5 is conjectural, and adds additional statements to true facts. It uses the shared knowledge and the 
+                        default graph, but does not permeate to anywhere.  
+                        The default graph permeate from the shared knowledge and epistemic graph g4, and permeates into conjectural graph g5.
+                    </p>
+                    <fv-sparql>
+    GRAPH ex:g1 { 
+        ex:entityX rdf:type ex:A . 
+        ex:entityY rdf:type ex:Z.
+    } 
+    ex:g1 rdf:type dec:sharedUniverse .
+
+    ex:A rdfs:subClassOf ex:B .
+    GRAPH ex:g2 { ex:A rdfs:subClassOf ex:C . } 
+    ex:g2 rdf:type dec:verbatimUniverse .
+    GRAPH ex:g3 { ex:A rdfs:subClassOf ex:D . } 
+    ex:g3 rdf:type dec:doxasticUniverse .
+    GRAPH ex:g4 { ex:A rdfs:subClassOf ex:E . } 
+    ex:g4 rdf:type dec:epistemicUniverse .
+    GRAPH ex:g5 { ex:A rdfs:subClassOf ex:F . } 
+    ex:g5 rdf:type dec:conjecturalUniverse .
+                    </fv-sparql>
+                    <p class="expect">
+                        Graph g1 (shared) does not change. 
+                        Graph g2 (verbatim) does not change. 
+                        Graph g3 (doxastic) permeates from the shared knowledge g1, and therefore asserts that entityX is 
+                        of type A (from shared) and of type D (from itself), but <b>not</b> of type B (from default graph). 
+                        The default graph permeates from the shared knowledge g1, and from the epistemic graph g4, 
+                        therefore asserts that entityX is of type A (from shared), of type B (from itself), and of type E (from g4).
+                        Graph g5 (conjectural) permeates from the shared knowledge g1 and from the default graph, and 
+                        therefore asserts that entityX is of type A (from shared), of type B (from the default graph), 
+                        and of type E (from itself). 
+                        The default graph permeates from the shared knowledge g1, and from the epistemic graph g4, but 
+                        not from the conjectural graph g5, therefore asserts that entityX is of type A (from shared), 
+                        of type B (from itself) and of type E (from epistemic graph g4).
+                    </p>
+                </fv-collapse>
+                <fv-collapse id="alphabet-verbatim" heading="A2 - Verbatim example" collapsed>
+                    <p class="comment">
+                        Graph g1 is shared knowledge. 
+                        Graph g2 is verbatim, so no inferences are made. 
+                        The default graph uses the shared knowledge, graph g2 does not.
+                    </p>
+                    <fv-sparql>
+    GRAPH ex:g1 { ex:entityX rdf:type ex:A . } 
+    ex:g1 rdf:type dec:sharedUniverse .
+
+    ex:A rdfs:subClassOf ex:B .
+    GRAPH ex:g2 { ex:A rdfs:subClassOf ex:C . } 
+    ex:g2 rdf:type dec:verbatimUniverse .
+                    </fv-sparql>
+                    <p class="expect">
+                        Graph g1 (shared) does not change. 
+                        Graph g2 (verbatim) does not change. 
+                        The default graph permeates from the shared knowledge g1, and therefore asserts that entityX is 
+                        of type A (from shared) and of type B (from itself), but <b>not</b> of type C (from g2).
+                    </p>
+                </fv-collapse>
+                <fv-collapse id="alphabet-doxastic" heading="A3 - Doxastic example" collapsed>
+                    <p class="comment">
+                        Graph g1 is shared knowledge. Graph g3 is doxastic, so only local inferences are made. 
+                        Both the default graph and graph g3 use the shared knowledge.
+                    </p>
+                    <fv-sparql>
+    GRAPH ex:g1 { ex:entityX rdf:type ex:A . } 
+    ex:g1 rdf:type dec:sharedUniverse .
+
+    ex:A rdfs:subClassOf ex:B .
+    GRAPH ex:g3 { ex:A rdfs:subClassOf ex:D . } 
+    ex:g3 rdf:type dec:doxasticUniverse .
+                    </fv-sparql>
+                    <p class="expect">
+                        Graph g1 (shared) does not change. 
+                        Graph g3 (doxastic) permeates from the shared knowledge g1, and therefore asserts that entityX is 
+                        of type A (from shared) and of type D (from itself), but <b>not</b> of type B (from default graph). 
+                        The default graph permeates from the shared knowledge g1, and therefore asserts that entityX is 
+                        of type A (from shared) and of type B (from itself), but <b>not</b> of type D (from g3).
+                    </p>
+                </fv-collapse>
+                <fv-collapse id="alphabet-epistemic" heading="A4 - Epistemic example" collapsed>
+                    <p class="comment">
+                        Graph g1 is shared knowledge. Graph g4 is epistemic, uses the shared knowledge, and all its inferences 
+                        permeate into the default graph. The default graph permeate from the shared knowledge and epistemic graph g4.
+                    </p>
+                    <fv-sparql>
+    GRAPH ex:g1 { ex:entityX rdf:type ex:A . } 
+          ex:g1 rdf:type dec:sharedUniverse .
+
+    ex:A rdfs:subClassOf ex:B .
+    GRAPH ex:g4 { ex:A rdfs:subClassOf ex:E . } 
+          ex:g4 rdf:type dec:epistemicUniverse .
+                    </fv-sparql>
+                    <p class="expect">
+                        Graph g1 (shared) does not change. 
+                        Graph g4 (epistemic) permeates from the shared knowledge g1, and therefore asserts that entityX is 
+                        of type A (from shared) and of type E (from itself), but <b>not</b> of type B (from default graph). 
+                        The default graph permeates from the shared knowledge g1, and from the epistemic graph g4, 
+                        therefore asserts that entityX is of type A (from shared), of type B (from itself), and of type E (from g4).
+                    </p>
+                </fv-collapse>
+                <fv-collapse id="alphabet-conjectural" heading="A5 - Conjectural example" collapsed>
+                    <p class="comment">
+                        Graph g1 is shared knowledge. Graph g5 is conjectural, uses the shared knowledge, and the default graph.
+                        The default graph permeate from the shared knowledge but not from epistemic graph g5.
+                    </p>
+                    <fv-sparql>
+    GRAPH ex:g1 { ex:entityX rdf:type ex:A . } 
+    ex:g1 rdf:type dec:sharedUniverse .
+
+    ex:A rdfs:subClassOf ex:B .
+    GRAPH ex:g5 { ex:A rdfs:subClassOf ex:F . } 
+    ex:g5 rdf:type dec:conjecturalUniverse .
+                    </fv-sparql>
+                    <p class="expect">
+                        Graph g1 (shared) does not change. 
+                        Graph g5 (conjectural) permeates from the shared knowledge g1 and from the default graph, and 
+                        therefore asserts that entityX is 
+                        of type A (from shared), of type B (from the default graph) of type E (from itself). 
+                        The default graph permeates from the shared knowledge g1, but not from the conjectural graph g5, 
+                        therefore asserts that entityX is of type A (from shared), and of type B (from itself).
+                    </p>
+                </fv-collapse>
+        </fv-collapse>
+        <fv-collapse id="zoology" heading="Zoology" collapsed>
+            <p class="comment">Here a few more meaningful examples based on the relationship between animal 
+                species and individual opinions about their reciprocal relationships.</p>
+            <fv-collapse id="zoology-named" heading="Z1 - The complete zoo" collapsed>
+                <p class="comment">Some basic facts and opinions about the world of animals. 
+                    Some statements are known to all, some are not.</p>
+                <fv-sparql>
+GRAPH :commonKnowledge {
+    # We are all aware of these facts 
+    :Mammal rdfs:subClassOf :Animal.
+    :Fish rdfs:subClassOf :Animal.
+    :Reptile rdfs:subClassOf :Animal.
+
+    :lassie a :Dog.
+    :mobydick a :Whale.
+    :toothless a :Dragon.
+}
+
+:Dog rdfs:subClassOf :Mammal.
+
+:aristotle :finds :newKnowledge.
+GRAPH :newKnowledge {
+    # Aristotle was the first to notice that whales are mammals
+    :Whale rdfs:subClassOf :Mammal.
+}
+
+:bruce :believes :mistakenKnowledge.
+GRAPH :mistakenKnowledge {
+    # Bruce thinks that whales are fishes. Bruce is mistaken.
+    :Whale rdfs:subClassOf :Fish.
+}
+
+:catherine :suggests :hypothesis.
+GRAPH :hypothesis {
+    # Catherine supposes that dragons are reptiles. We do not know if she is right.
+    :Dragon rdfs:subClassOf :Reptile.
+}
+
+:commonKnowledge rdf:type dec:sharedUniverse. # graph :shared is shared knowledge
+:finds a dec:epistemicPredicate.      # :finds wraps additional facts
+:believes a dec:doxasticPredicate.      # :thinks wraps personal opinions
+:suggests a dec:conjecturalPredicate. # :suggests wraps conjectures
+                </fv-sparql>
+            </fv-collapse>
+            <fv-collapse id="dolphin" heading="Z2 - Dolphins (Verbatim graph)" collapsed>
+                <p class="comment">Alice says that dolphins are mammals.</p>
+                <fv-sparql>
+:Flipper a zoo:Dolphin.
+zoo:Mammal rdfs:subClassOf zoo:Animal.
+
+GRAPH :g1 { zoo:Dolphin rdfs:subClassOf zoo:Mammal. } 
+:g1 a dec:verbatimUniverse.
+:alice :says :g1.
+                </fv-sparql>
+                <p class="expect">
+                    Alice says that dolphins are mammals.
+                    Yet, although mammals are animals, Alice does <b>not</b> say that dolphins are mammals.
+                    No inference on Alice's words is performed, because she did not <b>say</b> the consequences of her words. 
+                </p>
+            </fv-collapse>
+            <fv-collapse id="dog" heading="Z3 - Whales - the naive belief (Doxastic graph)" collapsed>
+                <p class="comment">Bruce is not very expert in zoology, and believes that whales are fishes.</p>
+                <fv-sparql>
+GRAPH :g2 { zoo:Whale rdfs:subClassOf zoo:Fish. } 
+:bruce :believes :g2.
+
+:believes a dec:doxasticPredicate .
+
+GRAPH :shared {
+    :mobydick a zoo:Whale.
+    zoo:Fish rdfs:subClassOf zoo:Animal.
+    zoo:Mammal rdfs:subClassOf zoo:Animal.
+}
+:shared a dec:sharedUniverse .
+</fv-sparql>
+                <p class="expect">
+                    We all know that Moby Dick is a whale. 
+                    Yet, Bruce believes that whales are fishes (how foolish!), and therefore, Moby Dick is a fish. 
+                 </p>
+            </fv-collapse>
+            <fv-collapse id="cat" heading="Z4 - Whales - the truth is out! (Epistemic graph)" collapsed>
+                <p class="comment">Catherine is correct in her knowledge. Moby Dick is indeed a mammal.</p>
+                <fv-sparql>
+GRAPH :g2 { zoo:Whale rdfs:subClassOf zoo:Mammal. } 
+:catherine :knows :g2.
+
+:knows a dec:epistemicPredicate .
+
+GRAPH :shared {
+    :mobydick a zoo:Whale.
+    zoo:Fish rdfs:subClassOf zoo:Animal.
+    zoo:Mammal rdfs:subClassOf zoo:Animal.
+}
+:shared a dec:sharedUniverse .
+                </fv-sparql>
+                <p class="expect">
+                    Moby Dick is a whale. This is a fact known to everybody.  
+                    Catherine is aware that whales are mammals. Since it is specified inside an epistemic universe, 
+                    this also ends up being a fact. 
+                    Therefore, Moby Dick is a whale, a mammal and an animal. 
+                </p>
+            </fv-collapse>
+            <fv-collapse id="dragon" heading="Z5 - Dragon (Conjectural graph)" collapsed>
+                <p class="comment">Nobody really knows the class of dragons, since they are fictional animals. 
+                    Nonetheless, David supposes that dragons are reptiles, and therefore Toothless for him is a reptile.</p>
+                <fv-sparql>
+:Toothless a zoo:Dragon.
+zoo:Dragon rdfs:subClassOf zoo:ImaginaryBeing.
+zoo:Reptile rdfs:subClassOf zoo:Animal.
+
+GRAPH :g4 { zoo:Dragon rdfs:subClassOf zoo:Reptile. } 
+:g4 a dec:conjecturalUniverse.
+:david :supposes :g4.
+                </fv-sparql>
+                <p class="expect">
+                    In reality, dragons do not exist, and therefore assigning them to reptiles is arbitrary and unjustified. 
+                    Nonetheless, David is free to think otherwise and to imagine that dragons were reptiles.
+                    Thus Toothless, the dragon of <i>Dragon Trainer</i>, in reality is only is a fictitious being, but in David's hypothesis is
+                    a reptile and an animal. 
+                </p>
+            </fv-collapse>
+            <fv-collapse id="dragon-reverse" heading="Z6 - Dragon (different syntax using DEC predicate)" collapsed>
+                <p class="comment">This is exactly the same example of Z5 (David supposes things about dragons). 
+                    There is a syntactical difference: the nature of the DEC universe is given by the governing predicate.</p>
+                <fv-sparql>
+:supposes a dec:conjecturalPredicate.
+:Toothless a zoo:Dragon.
+zoo:Dragon rdfs:subClassOf zoo:ImaginaryBeing.
+zoo:Reptile rdfs:subClassOf zoo:Animal.
+
+:david :supposes :g4.
+GRAPH :g4 { zoo:Dragon rdfs:subClassOf zoo:Reptile. } 
+                </fv-sparql>
+                <p class="expect">
+                    In reality, dragons do not exist, and therefore assigning them to reptiles is arbitrary and unjustified. 
+                    Nonetheless, David is free to think otherwise and to imagine that dragons were reptiles.
+                    Thus Toothless, the dragon of <i>Dragon Trainer</i>, in reality is only is a fictitious being, but in David's hypothesis is
+                    a reptile and an animal. 
+                </p>
+            </fv-collapse>
+            <fv-collapse id="dragon-reverse" heading="Z7 - Dragon (different syntax using reverse DEC predicate)" collapsed>
+                <p class="comment">This is exactly the same example of Z5 (David supposes things about dragons). 
+                    There is yet another syntactical difference: governing predicate can also have DEC graphs as subjects.</p>
+                <fv-sparql>
+:isSuggestedBy a dec:conjecturalReversePredicate.
+:Toothless a zoo:Dragon.
+zoo:Dragon rdfs:subClassOf zoo:ImaginaryBeing.
+zoo:Reptile rdfs:subClassOf zoo:Animal.
+
+:g4 :isSuggestedBy :david.
+GRAPH :g4 { zoo:Dragon rdfs:subClassOf zoo:Reptile. } 
+                </fv-sparql>
+                <p class="expect">
+                    In reality, dragons do not exist, and therefore assigning them to reptiles is arbitrary and unjustified. 
+                    Nonetheless, David is free to think otherwise and to imagine that dragons were reptiles.
+                    Thus Toothless, the dragon of <i>Dragon Trainer</i>, in reality is only is a fictitious being, but in David's hypothesis is
+                    a reptile and an animal. 
+                </p>
+            </fv-collapse>
+            <fv-collapse id="dragon-range" heading="Z8 - Dragon (different syntax using DEC range)" collapsed>
+                <p class="comment">This is exactly the same example of Z5 (David supposes things about dragons). 
+                    There is a syntactical difference: instead of characterizing the graph containing David's supposition,
+                    we qualify the predicate governing the graph, very useful in case there are many different conjectures to handle.</p>
+                <fv-sparql>
+:supposes rdfs:range dec:conjecturalUniverse.
+:Toothless a zoo:Dragon.
+zoo:Dragon rdfs:subClassOf zoo:ImaginaryBeing.
+zoo:Reptile rdfs:subClassOf zoo:Animal.
+
+GRAPH :g4 { zoo:Dragon rdfs:subClassOf zoo:Reptile. } 
+:david :supposes :g4.
+                </fv-sparql>
+                <p class="expect">
+                    In reality, dragons do not exist, and therefore assigning them to reptiles is arbitrary and unjustified. 
+                    Nonetheless, David is free to think otherwise and to imagine that dragons were reptiles.
+                    Thus Toothless, the dragon of <i>Dragon Trainer</i>, in reality is only is a fictitious being, but in David's hypothesis is
+                    a reptile and an animal. 
+                </p>
+            </fv-collapse>
+        </fv-collapse>
+        <fv-collapse id="Superman" heading="Superman's paradox" collapsed>
+            <p class="comment">Superman's paradox is a well known paradox in logic. Lois Lane, Superman's fiancee, 
+                knows that Superman can fly. Since Superman and Clark Kent are the same person, does she know that 
+                Clark Kent can fly? We show the same example in three syntaxes: rdf-star, reification and named graphs.</p>
+            <fv-collapse id="Superman-base-rdfstar" heading="S1* - Superman's problem (rdf-star - verbatim)" collapsed>
+                <p class="comment">This is the usual representation of the paradox of Superman using rdf-star triples. </p>
+                <fv-sparql>
+:superman owl:sameAs :clarkkent.
+:loislane :thinks << :superman :can :fly >>.
+                </fv-sparql>
+                <p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. 
+                    Yet, by default we treat rdf-star statements as verbatim, there is no inference and no paradox here. </p>
+            </fv-collapse>
+            <fv-collapse id="Superman-base-reification" heading="S1r - Superman's problem (reification - verbatim)" collapsed>
+                <p class="comment">This is the usual representation of the paradox of Superman using a reification syntax. </p>
+                <fv-sparql>
+:superman owl:sameAs :clarkkent.
+:loislane :thinks :S1.
+:S1 rdf:type rdf:Statement.
+:S1 rdf:Subject :superman. 
+:S1 rdf:Predicate :can.
+:S1 rdf:Object :fly.
+                </fv-sparql>
+                <p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. 
+                    Yet, by default we treat rdf-star statements as verbatim, there is no inference and no paradox here. </p>
+            </fv-collapse>
+            <fv-collapse id="Superman-base-named" heading="S1r - Superman's problem (named graph - verbatim)" collapsed>
+                <p class="comment">This is the usual representation of the paradox of Superman using a named graph. </p>
+                <fv-sparql>
+:superman owl:sameAs :clarkkent.
+:loislane :thinks :S1 
+GRAPH :S1 {
+    :superman :can :fly.
+}
+                </fv-sparql>
+                <p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. 
+                    Yet, by default we treat rdf-star statements as verbatim, there is no inference and no paradox here. </p>
+            </fv-collapse>
+            <fv-collapse id="Superman-doxastic" heading="S2 - Superman's problem using doxastic rdf-star" collapsed>
+                <p class="comment">This is a doxastic version of Superman's problem. A doxastic predicate seems the best choice in this case, because it introduces a subjective universe completely separate from reality and independent from it.</p>
+                <fv-sparql>
+:superman owl:sameAs :clarkkent.
+:loislane :thinks << :superman :can :fly >>.
+:thinks a dec:doxasticPredicate.
+
+GRAPH :shared {
+    :Superhero owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty :can ;
+        owl:hasValue :fly
+    ] .
+}
+:shared a dec:sharedUniverse. 
+</fv-sparql>
+<p class="expect">Predicate :think is specified as a doxastic predicate, so it does not allow permeation to and from reality even if inferences are allowed. yet, no paradox takes place.
+</p>
+            </fv-collapse>
+            <fv-collapse id="Superman-conjectural" heading="S3 - Superman's problem using conjectural rdf-star" collapsed>
+                <p class="comment">The only way to generate a Superman's paradox with DEC is to assume that Lois Lane's thoughts actually permeate facts from reality (i.e., they are conjectures). This choice would indeed generate the paradox.</p>
+                <fv-sparql>
+:superman owl:sameAs :clarkkent.
+:loislane :thinks << :superman :can :fly >>.
+:thinks a dec:conjecturalPredicate.
+                </fv-sparql>
+<p class="expect">Predicate :think is now specified as an conjectural predicate, which permeates to reality. Therefore, we are required to conclude that Lois Lane thinks that Clark Kent can fly.
+</p>
+            </fv-collapse>
+            <fv-collapse id="Superman-subclass-base" heading="It is not a referential problem! (base version)" collapsed>
+                <p class="comment">This is an exactly equivalent dataset that uses subclasses instead of sameAs relationships, and yet generate an equivalent paradox. It is not a referential problem, but an inferential one!</p>
+                <fv-sparql>
+:SuperHero rdfs:subClassOf :FictionalBeing.
+:loislane :thinks << :superman a :SuperHero >>
+                </fv-sparql>
+<p class="expect">One may be tempted to deduce that Lois Lane thinks that Superman is a fictional being. This also is a paradox, but it is not a referential one: blocking a name change does not affect the paradoxicality of the statement. </p>
+            </fv-collapse>
+            <fv-collapse id="Superman-subclass-doxastic" heading="It is not a referential problem! (doxastic version)" collapsed>
+                <p class="comment">Again, if we choose a doxastic relationship, the paradox disappears.</p>
+                <fv-sparql>
+:thinks a dec:doxasticPredicate.
+:SuperHero rdfs:subClassOf :FictionalBeing.
+:loislane :thinks << :superman a :SuperHero >>
+                </fv-sparql>
+            </fv-collapse>
+            <fv-collapse id="Superman-subclass-conjectural" heading="It is not a referential problem! (conjectural version)" collapsed>
+                <p class="comment">Again, the only way to generate the paradox is using a conjecture.</p>
+                <fv-sparql>
+:thinks a dec:conjecturalPredicate.
+:SuperHero rdfs:subClassOf :FictionalBeing.
+:loislane :thinks << :superman a :SuperHero >>
+                </fv-sparql>
+            </fv-collapse>
+        </fv-collapse>
+        <fv-collapse id="humanities" heading="Issues in the Humanities" collapsed>
+            <fv-collapse id="SalvatorMundi" heading="H1 - The attribution of the Salvator Mundi" collapsed>
+                <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding: 0.5em;">
+                        <img class="img-fluid" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/330px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg">
+                    </span>
+                    <b>From <a href="https://en.wikipedia.org/wiki/Salvator_Mundi_(Leonardo)" target="_blank">Wikipedia</a></b><br> 
+                    The traditional attribution of the painting "Salvator Mundi" was to Bernardino Luini</a>. In 1958 it was sold 
+                    for £45 as a work by Boltraffio. After heavy restoration works by Dianne Dwyer Modestini in 2006-2011, the attribution 
+                    to Leonardo da Vinci was proposed and discussed. Under this attribution, the painting was sold in 2017 
+                    for 450 US$ millions. The attribution to Leonardo divided the scholars in three main groups.  
+                    <b>Full attribution to Leonardo</b>: Dianne Dwyer Modestini, Nicholas Penny, Martin Kemp, Walter Isaacson, 
+                    Nicholas Hall and many others, all believe the painting "Salvator Mundi" is by Leonardo da Vinci. 
+                    <b>Partial attribution to Leonardo</b>: Carmen Bambach attributes much to Boltraffio and only some retouchings to Leonardo. 
+                    Matthew Landrus thinks it is a work of Bernardino Luini with 5% by Leonardo. Frank Zöllner thinks it was mostly done by a 
+                    pupil of Leonardo, with distinct retouchings by the restorer Dianne Dwyer Modestini. 
+                    <b>Rejection of attribution</b>: Jacques Franck believes the painting to be jointly by Salai and Boltraffio. Michael Daley 
+                    thinks it is the model of a painting used by Leonardo for his own. 
+                </p>
+                <fv-sparql>
+# Attribution assignments 
+ex:earlyTradition ex:suggests ex:OnlyLuini.
+ex:lateTradition ex:suggests ex:OnlyBoltraffio.
+
+ex:Modestini ex:believes ex:OnlyLeonardo. 
+ex:Penny ex:believes ex:OnlyLeonardo. 
+ex:Kemp ex:believes ex:OnlyLeonardo. 
+ex:Isaacson ex:believes ex:OnlyLeonardo. 
+ex:Hall ex:believes ex:OnlyLeonardo. 
+
+ex:Bambach ex:suggests ex:BoltraffioLeonardo. 
+ex:Landrus ex:suggests ex:LuiniLeonardo. 
+ex:Zoellner ex:suggests ex:PupilModestini.
+ex:Franck ex:believes ex:BoltraffioSalai.
+ex:Daley ex:suggests ex:NotLeonardo. 
+
+# Attributions
+GRAPH ex:OnlyLeonardo {
+    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
+    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
+}
+GRAPH ex:OnlyLuini {
+    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Luini.
+}
+GRAPH ex:OnlyBoltraffio {
+    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Boltraffio.
+}
+
+GRAPH ex:BoltraffioLeonardo {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Boltraffio.
+    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
+}
+
+GRAPH ex:LuiniLeonardo {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Luini.
+    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
+}
+
+GRAPH ex:PupilModestini {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author [
+        owl:differentFrom ex:LeonardoDaVinci 
+    ].
+    ex:SalvatorMundi ex:author ex:DwyerModestini.
+}
+
+GRAPH ex:BoltraffioSalai {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Boltraffio.
+    ex:SalvatorMundi ex:author ex:Salai.
+}
+
+GRAPH ex:NotLeonardo {
+    ex:SalvatorMundi ex:author [
+        owl:differentFrom ex:LeonardoDaVinci 
+    ].
+}
+
+# Shared knowledge
+GRAPH ex:EverybodyAgreesThat {
+    ex:SalvatorMundi rdf:type ex:painting.
+    ex:LeonardoDaVinci rdf:type ex:Artist.
+    ex:Boltraffio rdf:type ex:Artist.
+    ex:Luini rdf:type ex:Artist.
+    ex:Salai rdf:type ex:Artist.
+    ex:DwyerModestini rdf:type ex:Artist.
+    ex:Artist owl:AllDifferent [
+        owl:distinctMembers (
+            ex:LeonardoDaVinci
+            ex:Boltraffio
+            ex:Luini
+            ex:Salai
+            ex:DwyerModestini
+        )
+    ] .
+    ex:SingleAuthorWork rdfs:subClassOf ex:Painting ;
+        rdfs:subClassOf [
+            rdf:type owl:Restriction ;
+            owl:onProperty ex:author ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger
+        ] .
+    ex:MultipleAuthorWork rdfs:subClassOf ex:Painting ;
+        rdfs:subClassOf [
+            rdf:type owl:Restriction ;
+            owl:onProperty ex:author ;
+            owl:minCardinality "2"^^xsd:nonNegativeInteger
+        ] .
+
+}
+
+ex:thinks rdf:type dec:doxasticPredicate.
+ex:believes rdf:type dec:doxasticPredicate.
+ex:suggests rdf:type dec:doxasticPredicate.
+ex:EverybodyAgreesThat rdf:type dec:sharedUniverse. 
+</fv-sparql>
+<p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
+            </fv-collapse>
+            <fv-collapse id="Shakespeare" heading="H2 - Shakespeare authorship question" collapsed>
+                <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding: 0.5em;">
+                        <img class="img-fluid" src="https://upload.wikimedia.org/wikipedia/commons/5/5d/ShakespeareCandidates1.jpg">
+                    </span>
+                    <b>From <a href="https://en.wikipedia.org/wiki/Shakespeare_authorship_question" target="_blank">Wikipedia</a></b><br> 
+                    Shakespeare authorship question is the argument that someone other than William Shakespeare 
+                    of Stratford-upon-Avon wrote the works attributed to him. Delia Bacon's The Philosophy of the 
+                    Plays of Shakespeare Unfolded (1857) proposed the first "group theory". It attributed the 
+                    works of Shakespeare to "a little clique of disappointed and defeated politicians" led by 
+                    Sir Walter Raleigh which included Sir Francis Bacon and perhaps Edmund Spenser, Lord Buckhurst, 
+                    and Edward de Vere. Gilbert Slater's The Seven Shakespeares (1931) proposed that the works were 
+                    written by seven different authors: Francis Bacon, Edward de Vere, Sir Walter Raleigh, 
+                    William Stanley, Christopher Marlowe, Mary Sidney, and Roger Manners In the early 1960s, Edward 
+                    de Vere, Francis Bacon, Roger Manners, William Herbert and Mary Sidney were suggested as members 
+                    of a group referred to as "The Oxford Syndicate". Christopher Marlowe, Robert Greene and Thomas 
+                    Nashe have also been proposed as participants. Francis Bacon was proposed as sole author by 
+                    William Henry Smith in 1856. A case for Edward De Vere, 17th Earl of Oxford's, authorship was 
+                    discusssed by J. Thomas Looney (1920). Christopher Marlowe was first proposed as the sole author 
+                    of Shakespeare's "stronger plays" in 1895 by Wilbur G. Zeigler. William Stanley, 6th Earl of 
+                    Derby, was first proposed as a candidate in 1891 by James Greenstreet. Although the idea has 
+                    attracted much public interest, all but a few Shakespeare scholars and literary historians 
+                    consider it a fringe theory, and for the most part acknowledge it only to rebut or disparage 
+                    the claims.
+                </p>
+                <fv-sparql>
+# Attribution assignments 
+ex:tradition ex:believes ex:OnlyShakespeare.
+ex:DeliaBacon ex:suggests ex:LittleClique.
+ex:GilbertSlater ex:proposes ex:SevenAuthors.
+[] ex:suggests ex:OxfordSyndicate.
+
+ex:WilliamHenrySmith ex:proposes ex:OnlyBacon.
+ex:JThomasLooney ex:discusses ex:OnlyDeVere.
+ex:WilburZeigler ex:proposes ex:OnlyMarlowe.
+ex:JamesGreenstreet ex:proposes ex:OnlyStanley. 
+ex:scholars ex:accept ex:OnlyShakespeare.  
+
+ex:believes rdf:type dec:doxasticPredicate.
+ex:suggests rdf:type dec:doxasticPredicate.
+ex:proposes rdf:type dec:doxasticPredicate.
+ex:discusses rdf:type dec:doxasticPredicate.
+ex:accept rdf:type dec:epistemicPredicate.
+ex:EverybodyAgreesThat rdf:type dec:sharedUniverse. 
+[] dec:verifyDisagreements true.
+
+
+# Attributions
+GRAPH ex:OnlyShakespeare {
+    ex:Hamlet rdf:type ex:SingleAuthorWork.
+    ex:Hamlet ex:author ex:Shakespeare.
+}
+GRAPH ex:LittleClique {
+    ex:Hamlet rdf:type ex:MultipleAuthorWork.
+    ex:Hamlet ex:author ex:WalterRaleigh.
+    ex:Hamlet ex:author ex:FrancisBacon.
+    ex:Hamlet ex:author ex:EdmundSpenser.
+    ex:Hamlet ex:author ex:LordBuckhurst.
+    ex:Hamlet ex:author ex:EdwardDeVere.
+}
+
+GRAPH ex:SevenAuthors {
+    ex:Hamlet rdf:type ex:MultipleAuthorWork.
+    ex:Hamlet ex:author ex:FrancisBacon.
+    ex:Hamlet ex:author ex:EdwardDeVere.
+    ex:Hamlet ex:author ex:WalterRaleigh.
+    ex:Hamlet ex:author ex:WilliamStanley.
+    ex:Hamlet ex:author ex:ChristopherMarlowe.
+    ex:Hamlet ex:author ex:MarySidney.
+    ex:Hamlet ex:author ex:RogerManners.
+}
+
+GRAPH ex:OxfordSyndicate {
+    ex:Hamlet rdf:type ex:MultipleAuthorWork.
+    ex:Hamlet ex:author ex:EdwardDeVere.
+    ex:Hamlet ex:author ex:FrancisBacon.
+    ex:Hamlet ex:author ex:RogerManners.
+    ex:Hamlet ex:author ex:WilliamHerbert.
+    ex:Hamlet ex:author ex:MarySidney.
+    ex:Hamlet ex:author ex:ChristopherMarlowe.
+    ex:Hamlet ex:author ex:RobertGreene.
+    ex:Hamlet ex:author ex:ThomasNashe.
+}
+GRAPH ex:OnlyBacon {
+    ex:Hamlet rdf:type ex:SingleAuthorWork.
+    ex:Hamlet ex:author ex:FrancisBacon.
+}
+GRAPH ex:OnlyDeVere {
+    ex:Hamlet rdf:type ex:SingleAuthorWork.
+    ex:Hamlet ex:author ex:EdwardDeVere.
+}
+GRAPH ex:OnlyMarlowe {
+    ex:Hamlet rdf:type ex:SingleAuthorWork.
+    ex:Hamlet ex:author ex:ChristopherMarlowe.
+}
+GRAPH ex:OnlyStanley {
+    ex:Hamlet rdf:type ex:SingleAuthorWork.
+    ex:Hamlet ex:author ex:WilliamStanley.
+}
+
+# Shared knowledge
+GRAPH ex:EverybodyAgreesThat {
+    ex:Hamlet rdf:type ex:Play.
+    ex:Play rdfs:subClassOf ex:Work.
+    ex:Author rdfs:subClassOf ex:Person. 
+
+    ex:ChristopherMarlowe rdf:type ex:Author.
+    ex:EdwardDeVere rdf:type ex:Author.
+    ex:EdmundSpenser rdf:type ex:Author.
+    ex:FrancisBacon rdf:type ex:Author.
+    ex:LordBuckhurst rdf:type ex:Author.
+    ex:MarySidney rdf:type ex:Author.
+    ex:RobertGreene rdf:type ex:Author.
+    ex:RogerManners rdf:type ex:Author.
+    ex:Shakespeare rdf:type ex:Author.
+    ex:ThomasNashe rdf:type ex:Author.
+    ex:WalterRaleigh rdf:type ex:Author.
+    ex:WilliamHerbert rdf:type ex:Author.
+    ex:WilliamStanley rdf:type ex:Author.
+    
+    ex:Author owl:AllDifferent [
+        owl:distinctMembers (
+            ex:ChristopherMarlowe
+            ex:EdwardDeVere
+            ex:EdmundSpenser
+            ex:FrancisBacon
+            ex:LordBuckhurst
+            ex:MarySidney
+            ex:RobertGreene
+            ex:RogerManners
+            ex:Shakespeare
+            ex:ThomasNashe
+            ex:WalterRaleigh
+            ex:WilliamHerbert
+            ex:WilliamStanley
+        )
+    ] .
+    ex:SingleAuthorWork rdfs:subClassOf ex:Work ;
+        rdfs:subClassOf [
+            rdf:type owl:Restriction ;
+            owl:onProperty ex:author ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger
+        ] .
+    ex:MultipleAuthorWork rdfs:subClassOf ex:Work ;
+        rdfs:subClassOf [
+            rdf:type owl:Restriction ;
+            owl:onProperty ex:author ;
+            owl:minCardinality "2"^^xsd:nonNegativeInteger
+        ] .
+}
+</fv-sparql>
+<p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
+            </fv-collapse>
+            <fv-collapse id="Shakespeare" heading="H3 - Hadrian's Wall" collapsed>
+                <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding-inline: 0.5em;">
+                        <img style="width: 100%; " src="https://upload.wikimedia.org/wikipedia/commons/0/0d/E-codices_bke-0047_001v_medium_%28cropped%29.jpg">
+                    </span>
+                    <b>From <a href="https://forums.forteana.org/index.php?threads/the-longest-and-most-consequential-footnote-in-history.69871/" target="_blank">Forteana</a></b><br> 
+                    Flavius Eutropius, a historian who lived in Rome and Constantinople between 363 and 387 AD, wrote about the building of a wall in the 
+                    northern part of Britain, under the orders of Septimius Severus, the Roman emperor who reigned between 193 and 211 AD. The venerable Bede, 
+                    the English monk and historian who lived between 672 and 735 AD, tried to make sense of Eutropius' claim of a wall built by Severus, and 
+                    since he knew the one much further north had been built by Antoninus Pius (142 AD), he inferred that the wall by Severus mentioned by Eutropius 
+                    was the one much further south. In 1840 priest and historian John Hodgson, while writing his magnus opus "History of Northumberland," challenged 
+                    the long-standing attribution of the wall to Severus. Since the book he was writing only tangentially regarded the wall, he devoted a single 
+                    footnote in volume III to his doubts. But since he was a thorough scholar, this footnote is a remarkable 173 pages long and provides ground-breaking 
+                    evidence supporting the attribution of the wall to Hadrian rather than Severus. Hodgson's ideas became  accepted and adopted as the correct attribution 
+                    of the wall, up to this day.</p>
+                <fv-sparql>
+# Attribution assignments 
+GRAPH :S1 { 
+    :Wall :creator :Hadrian.
+    :Wall :inception "122"^^xsd:gYear.
+}
+:S1 prov:wasAttributedTo :Hodgson;
+    prov:wasDerivedFrom :HistoryOfNorthumbria.
+
+GRAPH :S2 {
+    :Wall :creator :Severus.
+    :Wall :inception "189"^^xsd:gYear.
+}
+:S2 prov:wasAttributedTo :Bede;
+    prov:wasDerivedFrom :HistoriaEcclesiastica.
+
+prov:wasAttributedTo a dec:doxasticReversePredicate. 
+:S1 a dec:epistemicUniverse. 
+:facts a dec:sharedUniverse. 
+
+# Shared knowledge
+GRAPH :facts {
+    :Wall a :manMadeThing.
+    :Severus a :romanEmperor.
+    :Hadrian a :romanEmperor.
+    :Severus owl:differentFrom :Hadrian.
+
+    :romanEmperor rdfs:subClassOf :Person. 
+    :creator a owl:FunctionalProperty.
+    :inception a owl:FunctionalProperty.
+}
+</fv-sparql>
+<p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
+            </fv-collapse>
+            <fv-collapse id="CigniBalaka" heading="H4 - Albano Carrisi vs. Michael Jackson" collapsed>
+                <div class="comment">
+                    <b>From <a href="https://en.wikipedia.org/wiki/Will_You_Be_There" target="_blank">Wikipedia</a></b><br> 
+                    <div class="linkList">
+                        <ul>
+                            <li><a href="https://www.youtube.com/watch?v=JlQewzn5IU8" target="video">I cigni di Balakà (Albano Carrisi - 1987)</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=jQY_QL_wvQU" target="video">Will You Be There (Michael Jackson - 1993)</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=bAw4cblnJoE" target="video">Bless You for Being an Angel (Ink Spots - 1939)</a></li>
+                        </ul>
+                    </div>
+                    In 1993 an Italian pop singer, Albano Carrisi, sued megastar Michael Jackson for plagiarism, claiming that 
+                    the song "Will you be there" by Jackson (1993) was derived from Carrisi's "I cigni di Balaka" (1987). After a first 
+                    ruling in favour of Carrisi, Jackson's lawyers appealed and claimed that a much older tune, "Bless You for Being an Angel" 
+                    by the Ink Spots (1939), already out of copyright, was the source of both songs. The judge ruled in favour of Jackson and 
+                    the ruling staid. 
+                </div>
+                <fv-sparql>
+# Attribution assignments 
+:CigniInfluencesWillYou prov:wasAttributedTo :AlbanoCarrisi.
+:BlessYouInfluencesBoth prov:wasAttributedTo :MichaelJacksons.
+:AppellateCourtOfMilan dbo:sentences :BlessYouInfluencesBoth. 
+prov:wasAttributedTo rdf:type dec:doxasticReversePredicate.
+dbo:sentences rdf:type dec:epistemicPredicate. 
+ex:EverybodyAgreesThat a dec:sharedUniverse.
+
+# Attributions
+GRAPH :CigniInfluencesWillYou {
+	:cigniDiBalaka dbo:recorded "1987". 
+	:willYouBeThere dbo:recorded "1993".
+	:willYouBeThere dbo:influencedBy :cigniDiBalaka. 
+} 
+GRAPH :BlessYouInfluencesBoth {
+	:cigniDiBalaka dbo:recorded "1987". 
+	:willYouBeThere dbo:recorded "1993".
+	:blessYouForBeingAnAngel dbo:recorded "1939". 
+	:cigniDiBalaka dbo:influencedBy :blessYouForBeingAnAngel .
+	:willYouBeThere dbo:influencedBy :blessYouForBeingAnAngel .
+} 
+
+# Shared knowledge
+GRAPH ex:EverybodyAgreesThat {
+	:cigniDiBalaka a dbo:Song.
+	:willYouBeThere a dbo:Song.
+	:blessYouForBeingAnAngel a dbo:Song.
+	dbo:influencedBy rdf:type owl:AntisymmetricProperty .
+}
+</fv-sparql>
+<p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
+            </fv-collapse>
+
+        </fv-collapse>  
+    </fv-collapse>
+    <fv-collapse id="disagreements" heading="DEC and disagreements">
+            <fv-collapse id="alphabet-disagreements" heading="D1 - Same as example A2" collapsed>
+                <p class="comment">
+                    Graph g1 is shared knowledge, and does not affect verbatim graphs. 
+                    Graph g2 is verbatim, and no local inferences are made. 
+                    Yet, we can still verify that the two graphs disagree. 
+                </p>
+                <fv-sparql>
+[] dec:verifyDisagreements true.
+[] dec:generateReportAnalysis true.
+ex:g1 rdf:type dec:sharedUniverse .
+ex:g2 rdf:type dec:verbatimUniverse .
+
+GRAPH ex:g1 { 
+    ex:entity rdf:type ex:A . 
+    ex:B owl:disjointWith ex:C  .
+} 
+
+ex:A rdfs:subClassOf ex:B .
+GRAPH ex:g2 { 
+    ex:A rdfs:subClassOf ex:C . 
+} 
+                </fv-sparql>
+                <p class="expect">
+                    Although Graph g2 has not changed after reasoning, we compared graph g2 with shared graph g1 and with reality and found disagreements. 
+                    
+                </p>
+            </fv-collapse>
+            <fv-collapse id="alphabet-doxastic" heading="D2 - Different opinions" collapsed>
+                <p class="comment">
+XXX
+                </p>
+                <fv-sparql>
+[] dec:verifyDisagreements true.
+[] dec:generateReportAnalysis true.
+ex:g1 rdf:type dec:sharedUniverse .
+ex:g2 rdf:type dec:doxasticUniverse .
+ex:g3 rdf:type dec:doxasticUniverse .
+
+GRAPH ex:g1 { 
+    ex:entity rdf:type ex:A . 
+    ex:D owl:disjointWith ex:E  .
+} 
+
+GRAPH ex:g2 { ex:A rdfs:subClassOf ex:D . } 
+GRAPH ex:g3 { ex:A rdfs:subClassOf ex:E . }
+</fv-sparql>
+                <p class="expect">
+                    Graph g3 is doxastic and inherits from shared graph g1. 
+                    Reality is separated and it also inherits from shared graph g1. 
+                </p>
+            </fv-collapse>
+
+            <fv-collapse id="agreements" heading="Agreements" collapsed>
+                <!-- Content for agreements base example -->
+            </fv-collapse>
+            <fv-collapse id="lies" heading="Lies" collapsed>
+                <!-- Content for agreements base example -->
+            </fv-collapse>
+            <fv-collapse id="skepticism" heading="Skepticism" collapsed>
+                <!-- Content for agreements base example -->
+            </fv-collapse>
