@@ -23,7 +23,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
                 individual (entityX) to explore in the simplest way the different types of reasoning affored by DEC universes. </p>
                 <fv-collapse id="alphabet-complete" heading="A1 - Complete example (named graphs)" collapsed>
                     <p class="comment">
-                        There are several DEC graphs each ecploring a different type of DEC reasoning. 
+                        There are several DEC graphs each exploring a different type of DEC reasoning. 
                         Graph g1 is shared knowledge and provides content for all graphs (except verbatim). 
                         Graph g2 is verbatim, and does not interact with the other graphs and performs no inferences.
                         Graph g3 is doxastic, does not interact with the other graphs but uses the shared knowledge and performs local inferences. 
@@ -272,7 +272,7 @@ GRAPH :g4 { zoo:Dragon rdfs:subClassOf zoo:Reptile. }
                     a reptile and an animal. 
                 </p>
             </fv-collapse>
-            <fv-collapse id="dragon-reverse" heading="Z6 - Dragon (different syntax using DEC predicate)" collapsed>
+            <fv-collapse id="dragon-predicate" heading="Z6 - Dragon (different syntax using DEC predicate)" collapsed>
                 <p class="comment">This is exactly the same example of Z5 (David supposes things about dragons). 
                     There is a syntactical difference: the nature of the DEC universe is given by the governing predicate.</p>
                 <fv-sparql>
@@ -424,125 +424,6 @@ GRAPH :shared {
             </fv-collapse>
         </fv-collapse>
         <fv-collapse id="humanities" heading="Issues in the Humanities" collapsed>
-            <fv-collapse id="SalvatorMundi" heading="H1 - The attribution of the Salvator Mundi" collapsed>
-                <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding: 0.5em;">
-                        <img class="img-fluid" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/330px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg">
-                    </span>
-                    <b>From <a href="https://en.wikipedia.org/wiki/Salvator_Mundi_(Leonardo)" target="_blank">Wikipedia</a></b><br> 
-                    The traditional attribution of the painting "Salvator Mundi" was to Bernardino Luini</a>. In 1958 it was sold 
-                    for £45 as a work by Boltraffio. After heavy restoration works by Dianne Dwyer Modestini in 2006-2011, the attribution 
-                    to Leonardo da Vinci was proposed and discussed. Under this attribution, the painting was sold in 2017 
-                    for 450 US$ millions. The attribution to Leonardo divided the scholars in three main groups.  
-                    <b>Full attribution to Leonardo</b>: Dianne Dwyer Modestini, Nicholas Penny, Martin Kemp, Walter Isaacson, 
-                    Nicholas Hall and many others, all believe the painting "Salvator Mundi" is by Leonardo da Vinci. 
-                    <b>Partial attribution to Leonardo</b>: Carmen Bambach attributes much to Boltraffio and only some retouchings to Leonardo. 
-                    Matthew Landrus thinks it is a work of Bernardino Luini with 5% by Leonardo. Frank Zöllner thinks it was mostly done by a 
-                    pupil of Leonardo, with distinct retouchings by the restorer Dianne Dwyer Modestini. 
-                    <b>Rejection of attribution</b>: Jacques Franck believes the painting to be jointly by Salai and Boltraffio. Michael Daley 
-                    thinks it is the model of a painting used by Leonardo for his own. 
-                </p>
-                <fv-sparql>
-# Attribution assignments 
-ex:earlyTradition ex:suggests ex:OnlyLuini.
-ex:lateTradition ex:suggests ex:OnlyBoltraffio.
-
-ex:Modestini ex:believes ex:OnlyLeonardo. 
-ex:Penny ex:believes ex:OnlyLeonardo. 
-ex:Kemp ex:believes ex:OnlyLeonardo. 
-ex:Isaacson ex:believes ex:OnlyLeonardo. 
-ex:Hall ex:believes ex:OnlyLeonardo. 
-
-ex:Bambach ex:suggests ex:BoltraffioLeonardo. 
-ex:Landrus ex:suggests ex:LuiniLeonardo. 
-ex:Zoellner ex:suggests ex:PupilModestini.
-ex:Franck ex:believes ex:BoltraffioSalai.
-ex:Daley ex:suggests ex:NotLeonardo. 
-
-# Attributions
-GRAPH ex:OnlyLeonardo {
-    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
-    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
-}
-GRAPH ex:OnlyLuini {
-    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
-    ex:SalvatorMundi ex:author ex:Luini.
-}
-GRAPH ex:OnlyBoltraffio {
-    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
-    ex:SalvatorMundi ex:author ex:Boltraffio.
-}
-
-GRAPH ex:BoltraffioLeonardo {
-    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
-    ex:SalvatorMundi ex:author ex:Boltraffio.
-    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
-}
-
-GRAPH ex:LuiniLeonardo {
-    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
-    ex:SalvatorMundi ex:author ex:Luini.
-    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
-}
-
-GRAPH ex:PupilModestini {
-    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
-    ex:SalvatorMundi ex:author [
-        owl:differentFrom ex:LeonardoDaVinci 
-    ].
-    ex:SalvatorMundi ex:author ex:DwyerModestini.
-}
-
-GRAPH ex:BoltraffioSalai {
-    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
-    ex:SalvatorMundi ex:author ex:Boltraffio.
-    ex:SalvatorMundi ex:author ex:Salai.
-}
-
-GRAPH ex:NotLeonardo {
-    ex:SalvatorMundi ex:author [
-        owl:differentFrom ex:LeonardoDaVinci 
-    ].
-}
-
-# Shared knowledge
-GRAPH ex:EverybodyAgreesThat {
-    ex:SalvatorMundi rdf:type ex:painting.
-    ex:LeonardoDaVinci rdf:type ex:Artist.
-    ex:Boltraffio rdf:type ex:Artist.
-    ex:Luini rdf:type ex:Artist.
-    ex:Salai rdf:type ex:Artist.
-    ex:DwyerModestini rdf:type ex:Artist.
-    ex:Artist owl:AllDifferent [
-        owl:distinctMembers (
-            ex:LeonardoDaVinci
-            ex:Boltraffio
-            ex:Luini
-            ex:Salai
-            ex:DwyerModestini
-        )
-    ] .
-    ex:SingleAuthorWork rdfs:subClassOf ex:Painting ;
-        rdfs:subClassOf [
-            rdf:type owl:Restriction ;
-            owl:onProperty ex:author ;
-            owl:cardinality "1"^^xsd:nonNegativeInteger
-        ] .
-    ex:MultipleAuthorWork rdfs:subClassOf ex:Painting ;
-        rdfs:subClassOf [
-            rdf:type owl:Restriction ;
-            owl:onProperty ex:author ;
-            owl:minCardinality "2"^^xsd:nonNegativeInteger
-        ] .
-
-}
-
-ex:thinks rdf:type dec:doxasticPredicate.
-ex:believes rdf:type dec:doxasticPredicate.
-ex:suggests rdf:type dec:doxasticPredicate.
-ex:EverybodyAgreesThat rdf:type dec:sharedUniverse. 
-</fv-sparql>
-<p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
-            </fv-collapse>
             <fv-collapse id="Shakespeare" heading="H2 - Shakespeare authorship question" collapsed>
                 <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding: 0.5em;">
                         <img class="img-fluid" src="https://upload.wikimedia.org/wikipedia/commons/5/5d/ShakespeareCandidates1.jpg">
@@ -695,7 +576,7 @@ GRAPH ex:EverybodyAgreesThat {
 </fv-sparql>
 <p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
             </fv-collapse>
-            <fv-collapse id="Shakespeare" heading="H3 - Hadrian's Wall" collapsed>
+            <fv-collapse id="HadriansWall" heading="H3 - Hadrian's Wall" collapsed>
                 <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding-inline: 0.5em;">
                         <img style="width: 100%; " src="https://upload.wikimedia.org/wikipedia/commons/0/0d/E-codices_bke-0047_001v_medium_%28cropped%29.jpg">
                     </span>
@@ -792,7 +673,125 @@ GRAPH ex:EverybodyAgreesThat {
 </fv-sparql>
 <p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
             </fv-collapse>
+            <fv-collapse id="SalvatorMundi" heading="H1 - The attribution of the Salvator Mundi" collapsed>
+                <p class="comment"><span style="float:right; display: inline-block; width: 50%; padding: 0.5em;">
+                        <img class="img-fluid" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg/330px-Leonardo_da_Vinci%2C_Salvator_Mundi%2C_c.1500%2C_oil_on_walnut%2C_45.4_%C3%97_65.6_cm.jpg">
+                    </span>
+                    <b>From <a href="https://en.wikipedia.org/wiki/Salvator_Mundi_(Leonardo)" target="_blank">Wikipedia</a></b><br> 
+                    The traditional attribution of the painting "Salvator Mundi" was to Bernardino Luini</a>. In 1958 it was sold 
+                    for £45 as a work by Boltraffio. After heavy restoration works by Dianne Dwyer Modestini in 2006-2011, the attribution 
+                    to Leonardo da Vinci was proposed and discussed. Under this attribution, the painting was sold in 2017 
+                    for 450 US$ millions. The attribution to Leonardo divided the scholars in three main groups.  
+                    <b>Full attribution to Leonardo</b>: Dianne Dwyer Modestini, Nicholas Penny, Martin Kemp, Walter Isaacson, 
+                    Nicholas Hall and many others, all believe the painting "Salvator Mundi" is by Leonardo da Vinci. 
+                    <b>Partial attribution to Leonardo</b>: Carmen Bambach attributes much to Boltraffio and only some retouchings to Leonardo. 
+                    Matthew Landrus thinks it is a work of Bernardino Luini with 5% by Leonardo. Frank Zöllner thinks it was mostly done by a 
+                    pupil of Leonardo, with distinct retouchings by the restorer Dianne Dwyer Modestini. 
+                    <b>Rejection of attribution</b>: Jacques Franck believes the painting to be jointly by Salai and Boltraffio. Michael Daley 
+                    thinks it is the model of a painting used by Leonardo for his own. 
+                </p>
+                <fv-sparql>
+# Attribution assignments 
+ex:earlyTradition ex:suggests ex:OnlyLuini.
+ex:lateTradition ex:suggests ex:OnlyBoltraffio.
 
+ex:Modestini ex:believes ex:OnlyLeonardo. 
+ex:Penny ex:believes ex:OnlyLeonardo. 
+ex:Kemp ex:believes ex:OnlyLeonardo. 
+ex:Isaacson ex:believes ex:OnlyLeonardo. 
+ex:Hall ex:believes ex:OnlyLeonardo. 
+
+ex:Bambach ex:suggests ex:BoltraffioLeonardo. 
+ex:Landrus ex:suggests ex:LuiniLeonardo. 
+ex:Zoellner ex:suggests ex:PupilModestini.
+ex:Franck ex:believes ex:BoltraffioSalai.
+ex:Daley ex:suggests ex:NotLeonardo. 
+
+# Attributions
+GRAPH ex:OnlyLeonardo {
+    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
+    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
+}
+GRAPH ex:OnlyLuini {
+    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Luini.
+}
+GRAPH ex:OnlyBoltraffio {
+    ex:SalvatorMundi rdf:type ex:SingleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Boltraffio.
+}
+
+GRAPH ex:BoltraffioLeonardo {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Boltraffio.
+    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
+}
+
+GRAPH ex:LuiniLeonardo {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Luini.
+    ex:SalvatorMundi ex:author ex:LeonardoDaVinci.
+}
+
+GRAPH ex:PupilModestini {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author [
+        owl:differentFrom ex:LeonardoDaVinci 
+    ].
+    ex:SalvatorMundi ex:author ex:DwyerModestini.
+}
+
+GRAPH ex:BoltraffioSalai {
+    ex:SalvatorMundi rdf:type ex:MultipleAuthorWork.
+    ex:SalvatorMundi ex:author ex:Boltraffio.
+    ex:SalvatorMundi ex:author ex:Salai.
+}
+
+GRAPH ex:NotLeonardo {
+    ex:SalvatorMundi ex:author [
+        owl:differentFrom ex:LeonardoDaVinci 
+    ].
+}
+
+# Shared knowledge
+GRAPH ex:EverybodyAgreesThat {
+    ex:SalvatorMundi rdf:type ex:painting.
+    ex:LeonardoDaVinci rdf:type ex:Artist.
+    ex:Boltraffio rdf:type ex:Artist.
+    ex:Luini rdf:type ex:Artist.
+    ex:Salai rdf:type ex:Artist.
+    ex:DwyerModestini rdf:type ex:Artist.
+    ex:Artist owl:AllDifferent [
+        owl:distinctMembers (
+            ex:LeonardoDaVinci
+            ex:Boltraffio
+            ex:Luini
+            ex:Salai
+            ex:DwyerModestini
+        )
+    ] .
+    ex:SingleAuthorWork rdfs:subClassOf ex:Painting ;
+        rdfs:subClassOf [
+            rdf:type owl:Restriction ;
+            owl:onProperty ex:author ;
+            owl:cardinality "1"^^xsd:nonNegativeInteger
+        ] .
+    ex:MultipleAuthorWork rdfs:subClassOf ex:Painting ;
+        rdfs:subClassOf [
+            rdf:type owl:Restriction ;
+            owl:onProperty ex:author ;
+            owl:minCardinality "2"^^xsd:nonNegativeInteger
+        ] .
+
+}
+
+ex:thinks rdf:type dec:doxasticPredicate.
+ex:believes rdf:type dec:doxasticPredicate.
+ex:suggests rdf:type dec:doxasticPredicate.
+ex:EverybodyAgreesThat rdf:type dec:sharedUniverse. 
+</fv-sparql>
+<p class="expect">One may be tempted to deduce that Lois Lane thinks that Clark Kent can fly. (Yet, since by default DEC treats rdf-star statements as verbatim, there is no paradox here.) </p>
+            </fv-collapse>
         </fv-collapse>  
     </fv-collapse>
     <fv-collapse id="disagreements" heading="DEC and disagreements">

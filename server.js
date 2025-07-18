@@ -33,7 +33,8 @@ const FULL_CONTENT = `
 	}`;
 const CLEAR_ALL = `CLEAR ALL; `;
 const PORT = 3000; // Node.js server port
-const FUSEKI_URL = 'http://localhost:3030'; // Base URL for Fuseki server
+const FUSEKI_URL = process.env.FUSEKI_URL || 'http://localhost:3030';
+   // const FUSEKI_URL = 'http://localhost:3030'; // Base URL for Fuseki server
 const doDebug = true;
 
 const app = express();
@@ -195,7 +196,7 @@ app.delete('/dataset', async (req, res) => {
 /*				  START SERVER							  */
 /* ---------------------------------------------------------- */
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
 	console.log(`Server is running at http://localhost:${PORT}`);
 });
 

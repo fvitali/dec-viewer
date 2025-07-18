@@ -18,7 +18,7 @@
 // Configuration for the DEC Viewer
 window.CONFIG = {
     NAME: "DEC Viewer",
-    SERVER: "http://localhost:3000/",
+    SERVER: "",
     DEFAULT_QUERY: `SELECT DISTINCT (IF(BOUND(?g), ?g, "<default>") AS ?graph) ?s ?p ?o
 WHERE {
   { GRAPH ?g { ?s ?p ?o } }
