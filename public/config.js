@@ -26,7 +26,6 @@ WHERE {
   { ?s ?p ?o }
 }
     `,
-    CLEAR: `CLEAR ALL`,
     FOOTER: "©2025 Fabio Vitali, fabio.vitali@unibo.it, All rights reserved, version 0.9",
   };
 window.RESOURCES = {

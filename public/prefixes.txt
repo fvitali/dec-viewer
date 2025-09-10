@@ -6,8 +6,9 @@ r urn:x-hp-jena:rubrik/​
 
 dbo http://dbpedia.org/ontology/
 prov http://www.w3.org/ns/prov#
-<empty> http://example.org/empty/
+dc http://purl.org/dc/elements/1.1/
+<empty> http://ex.org/
 ex http://example.org/
 zoo http://zoology.example.org/
-disagreement http://dec.fabiovitali.it/disagreements/
-dec http://dec.fabiovitali.it/
+disagreement http://w3id.org/conjectures/disagreements/
+dec http://w3id.org/conjectures/

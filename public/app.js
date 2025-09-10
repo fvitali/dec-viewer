@@ -15,13 +15,18 @@
  */
 
 import { getGlobals, setGlobals } from './main.js';
-import { handleCodeClick } from './ui.js';
+import { appendData, startQuery } from './ui.js';
 import { p } from './utils.js';
 
 
+/**
+ * Analyzes SPARQL bindings to extract DEC-related metadata
+ * @param {Array<Object>} bindings - Array of SPARQL binding objects
+ * @returns {Object} Object containing analyzed data with headers, rows, decTypes, shared, labels, and decPredicates
+ */
 export function analyzeBindings(bindings) {
     const rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-    const decNamespace = "http://dec.fabiovitali.it/";
+    const decNamespace = "http://w3id.org/conjectures/";
     let decTypes = {};
     let URIsForShared = [];
     let shared = [];
@@ -31,8 +36,9 @@ export function analyzeBindings(bindings) {
     bindings.forEach(b => {
         if (b.p.value === rdfType && b.o.value.startsWith(decNamespace)) {
             const type = b.o.value.split("/").pop();
-            decTypes[b.s.value] = type;
-            if (type === "sharedUniverse") {
+            if (!decTypes[b.s.value]) decTypes[b.s.value] = [];
+            decTypes[b.s.value].push(type);
+            if (type === "sharedWorld") {
                 URIsForShared.push(b.s.value);
             }
         }
@@ -67,7 +73,7 @@ export function analyzeBindings(bindings) {
             s.o.value === b.o.value && 
             s.graph.value !== b.graph.value
         )) {
-            b.dec.push('sharedUniverse');
+            b.dec.push('sharedWorld');
         }
       if (decTypes[b.graph.value]) {
             b.dec.push(decTypes[b.graph.value]);
@@ -84,29 +90,50 @@ export function analyzeBindings(bindings) {
     };
 }
 
+/**
+ * Groups SPARQL data by graph and organizes content hierarchically
+ * @param {Array<Object>} data - Array of SPARQL binding objects
+ * @returns {Object} Grouped data structure organized by graph with meta and content sections
+ */
 export function groupData(data) {
   const groups = {};
   const decTypes = getGlobals("decTypes");
   const shared = getGlobals("shared");
   const decPredicates = getGlobals("decPredicates");
-  const allGraphs = Array.from(new Set(data.map(b => b.graph?.value).filter(Boolean)));
+  const allWorlds = Array.from(new Set(data.map(b => b.graph?.value).filter(Boolean)));
 
   data.forEach(b => {
-    const g = b.graph?.value || "<default>";
-    const s = b.s.value;
-    const p = b.p.value;
-    const o = b.o.value;
-    const isDec = allGraphs.map(i => ((g === "<default>" || 
+    let g = b.graph?.value || "<default>";
+    let s = b.s.value;
+    let p = b.p.value;
+    let o = b.o.value;
+    const isADecStatement = 
+        typeof p ==='string' && p.match(/^http:\/\/w3id\.org\/conjectures\//) || 
+        typeof s ==='string' && s.match(/^http:\/\/w3id\.org\/conjectures\//) || 
+        typeof o ==='string' && o.match(/^http:\/\/w3id\.org\/conjectures\//);
+    const isADecWorld = allWorlds.map(i => ((g === "<default>" || 
       g === undefined) && (i==s || i==o) ) ? i : null)
       .filter(x => x !== null)
-    if (isDec.length > 0) {
-      const v = isDec[0]
+    if (isADecWorld.length > 0) {
+      const v = isADecWorld.find(i => i==s) || isADecWorld[0]
       groups[v] = groups[v] || {meta: {}, dec:new Set(), content:{}} 
       groups[v]['meta'][s] = groups[v]['meta'][s]  || {}
       groups[v]['meta'][s][p] = groups[v]['meta'][s][p] || {v:[]}
       groups[v]['meta'][s][p].v.push({ v: o})
+    } else if (isADecStatement) {
+      groups['decStatements'] = groups['decStatements'] || {meta: {}, dec:new Set(), content:{}} 
+      groups['decStatements']['content'][s] = groups['decStatements']['content'][s]  || {dec:new Set()}
+      groups['decStatements']['content'][s][p] = groups['decStatements']['content'][s][p] || {v:[], dec:new Set()}
+      const v = { v: o, dec: new Set()}
+      groups['decStatements']['content'][s][p].v.push(v)
+      if (decPredicates[p]) {
+        v.dec.add(decPredicates[p]);
+      }
     } else {
       groups[g] = groups[g] || {meta: {}, dec:new Set(), content:{}} 
+      if (typeof s === 'object') {
+        s = "<<" + s.subject.value + " " + s.predicate.value + " " + s.object.value + ">>";
+      }
       groups[g]['content'][s] = groups[g]['content'][s]  || {dec:new Set()}
       groups[g]['content'][s][p] = groups[g]['content'][s][p] || {v:[], dec:new Set()}
       const v = { v: o, dec: new Set()}
@@ -115,34 +142,42 @@ export function groupData(data) {
         v.dec.add(decPredicates[p]);
       }
       if (shared.some(x => x.s.value === s && x.p.value === p && x.o.value === o)) {
-        v.dec.add("sharedUniverse");
+        v.dec.add("sharedWorld");
         if (groups[g].dec.size == 0) {
-          groups[g].dec.add("sharedUniverse");
+          groups[g].dec.add("sharedWorld");
         }
         if (groups[g]['content'][s].dec.size == 0) {
-          groups[g]['content'][s].dec.add("sharedUniverse");
+          groups[g]['content'][s].dec.add("sharedWorld");
         }
         if (groups[g]['content'][s][p].dec.size == 0) {
-          groups[g]['content'][s][p].dec.add("sharedUniverse");
+          groups[g]['content'][s][p].dec.add("sharedWorld");
         }
       }  else {
           groups[g].dec.clear();
           groups[g]['content'][s].dec.clear();
           groups[g]['content'][s][p].dec.clear();
-          groups[g].dec.add(decTypes[g]);
+          decTypes[g]?.forEach( i => groups[g].dec.add(i) )
       }
     }
   });
   return groups ; 
 }
 
+/**
+ * Filters and sorts SPARQL binding data based on criteria
+ * @param {Array<Object>} data - Array of SPARQL binding objects to filter and sort
+ * @param {string} filter - Filter criteria ("1" filters schema, "2" filters schema and shared)
+ * @param {string} sortField - Field name to sort by
+ * @param {string} direction - Sort direction ("asc" or "desc")
+ * @returns {Array<Object>} Filtered and sorted array of bindings
+ */
 export function filterAndSort(data, filter, sortField, direction) {
   if (data.length === 0) return  [];
   let rows = []
   data.forEach(row => {
     if (filter === "1" && row["dec"].includes("schema")) return; // filter schema
     if (filter === "2" && row["dec"].includes("schema")) return; // filter shared
-    if (filter === "2" && row["dec"].includes("sharedUniverse")) return; // filter shared
+    if (filter === "2" && row["dec"].includes("sharedWorld")) return; // filter shared
     rows.push(row);
   });
   rows.sort((a, b) => { 
@@ -152,39 +187,12 @@ export function filterAndSort(data, filter, sortField, direction) {
   return rows
 }
 
-  
-function OldgetDecType(binding) {
-  const rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-  let hasRdfType = false;
-  let decStatementValue;
 
-  // First check if it's a schema statement
-  if (schemaStatement(binding)) return null;
-
-  // Check for both rdf:type and dec statement
-  for (const key in binding) {
-      if (binding[key].value === rdfType) {
-          hasRdfType = true;
-      }
-      if (binding[key].value.startsWith("http://dec.fabiovitali.it/")) {
-          decStatementValue = binding[key].value.split("/").pop();
-      }
-  }
-
-  // Only create result if both conditions are met
-  if (hasRdfType && decStatementValue) {
-      const result = {};
-      for (const key in binding) {
-          if (binding[key].value !== rdfType && !binding[key].value.startsWith("http://dec.fabiovitali.it/")) {
-              result[binding[key].value] = decStatementValue;
-          }
-      }
-      return result;
-  }
-
-  return null;
-}
-
+/**
+ * Determines if a SPARQL binding represents a schema statement
+ * @param {Object} binding - SPARQL binding object with graph, s, p, o properties
+ * @returns {boolean} True if the binding matches schema patterns and not exceptions
+ */
 function schemaStatement(binding) {
   const patterns = [
       "* http://www.w3.org/2002/07/owl# * *",
@@ -201,7 +209,7 @@ function schemaStatement(binding) {
   ];
 
   const exceptions = [
-      "aaa * http://www.w3.org/1999/02/22-rdf-syntax-ns#type *",
+      "* * http://w3id.org/conjectures/closedFor *",
   ];
 
   const match = (value, pattern, xYMap) => {
@@ -216,109 +224,54 @@ function schemaStatement(binding) {
       return typeof value === 'string' && value.startsWith(pattern);
   };
 
-  const matchesPattern = (binding, patternsArray) => {
+  const matchesPattern = (valuesArray, patternsArray) => {
       return patternsArray.some((pattern) => {
           const [graphPattern, sPattern, pPattern, oPattern] = pattern.split(" ");
-          const values = [binding.graph?.value || "", binding.s?.value || "", binding.p?.value || "", binding.o?.value || ""];
           const patterns = [graphPattern, sPattern, pPattern, oPattern];
           const xYMap = { x: undefined, y: undefined };
-          return patterns.every((pattern, index) => match(values[index], pattern, xYMap));
+          return patterns.every((pattern, index) => match(valuesArray[index], pattern, xYMap));
       });
   };
 
-  if (matchesPattern(binding, exceptions)) return false;
-  return matchesPattern(binding, patterns);
-}
-function SharedGraphURIs(binding) {
-	const values = Object.values(binding).map(item => item.value);
-	const hasType = values.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-	const hasShared = values.includes("http://dec.fabiovitali.it/shared");
-	if (hasType && hasShared) {
-		let remaining = values.filter(v => v !== "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && v !== "http://dec.fabiovitali.it/shared");
-		return remaining;
-	}
-	return [];
-}
+  const getBindingValues = (binding) => {
+      const graph = binding.graph?.value || "";
+      let s = binding.s?.value || "";
+      const p = binding.p?.value || "";
+      let o = binding.o?.value || "";
 
-function metastatement(binding) {
-  let values = Object.values(binding)
-  return values.some(v => 
-    v?.value?.startsWith("http://dec.fabiovitali.it/")
-  )
-}
-
-function filterByValues(bindings, elementName, filterables, exceptions = []) {
-  return bindings.filter((binding) => {
-    const elementValue = binding[elementName]?.value || "";
-    const shouldFilter = filterables.some((uri) => {
-      return elementValue.startsWith(uri) && !exceptions.includes(elementValue);
-    });
-    return !shouldFilter;
-  });
-}
-
-function filterOWLRDFXSD(bindings) {
-  const patterns = [
-    "* http://www.w3.org/2002/07/owl# * *",
-    "* http://www.w3.org/1999/02/22-rdf-syntax-ns# * *",
-    "* http://www.w3.org/2000/01/rdf-schema# * *",
-    "* http://www.w3.org/2001/XMLSchema# * *",
-    "* urn:x-hp-jena:rubrik/ * *",
-    "* x * x",
-    "* * * http://www.w3.org/2000/01/rdf-schema#Class",
-    "* * * http://www.w3.org/2002/07/owl#Class",
-    "* * * http://www.w3.org/2000/01/rdf-schema#Resource",
-    "* * * http://www.w3.org/2002/07/owl#Thing",
-  ];
-
-  const exceptions = [
-    "aaa * http://www.w3.org/1999/02/22-rdf-syntax-ns#type *",
-  ];
-
-  const match = (value, pattern, xYMap) => {
-    if (pattern === "*") return true;
-
-    // Handle x and y: enforce consistent mapping
-    if (["x", "y"].includes(pattern)) {
-      if (xYMap[pattern] === undefined) {
-        xYMap[pattern] = value; // Assign the value to x or y
-        return true;
+      // Handle nested triples in subject position
+      if (typeof binding.s?.value === 'object') {
+          const sTriple = binding.s.value;
+          const sValues = [graph, sTriple.subject.value, sTriple.predicate.value, sTriple.object.value];
+          if (!matchesPattern(sValues, exceptions) && matchesPattern(sValues, patterns)) {
+              return { earlyReturn: true }; // Triple matches patterns and not exceptions - return true
+          }
       }
-      return xYMap[pattern] === value; // Ensure the value matches the existing assignment
-    }
 
-    // Check if value starts with the pattern string
-    return value.startsWith(pattern);
+      // Handle nested triples in object position  
+      if (typeof binding.o?.value === 'object') {
+          const oTriple = binding.o.value;
+          const oValues = [graph, oTriple.subject.value, oTriple.predicate.value, oTriple.object.value];
+          if (!matchesPattern(oValues, exceptions) && matchesPattern(oValues, patterns)) {
+              return { earlyReturn: true }; // Triple matches patterns and not exceptions - return true
+          }
+      }
+
+      return [graph, s, p, o];
   };
 
-  const matchesPattern = (binding, patternsArray) => {
-    return patternsArray.some((pattern) => {
-      const [graphPattern, sPattern, pPattern, oPattern] = pattern.split(" ");
-      const values = [binding.graph?.value || "", binding.s?.value || "", binding.p?.value || "", binding.o?.value || ""];
-      const patterns = [graphPattern, sPattern, pPattern, oPattern];
-
-      // Create a fresh xYMap for each binding evaluation
-      const xYMap = { x: undefined, y: undefined };
-
-      return patterns.every((pattern, index) => match(values[index], pattern, xYMap));
-    });
-  };
-
-  const filteredBindings = bindings.filter((binding) => {
-    // Exclude bindings that match any exception pattern
-    if (matchesPattern(binding, exceptions)) {
-      return true;
-    }
-
-    // Include bindings that do not match any filterable pattern
-    if (matchesPattern(binding, patterns)) return false;
-
-    return true;
-  });
-
-  return filteredBindings;
+  const values = getBindingValues(binding);
+  if (values && values.earlyReturn) return true; // Nested triple matched patterns
+  
+  if (matchesPattern(values, exceptions)) return false;
+  return matchesPattern(values, patterns);
 }
 
+/**
+ * Replaces URIs with prefixes for more readable display
+ * @param {string|Object} value - URI string or object containing URIs
+ * @returns {string|Array} Value with URIs replaced by prefixes, or array for objects
+ */
 function usePrefixes(value) {
   if (value == undefined) return "";
   if (typeof value == 'object') {
@@ -327,36 +280,55 @@ function usePrefixes(value) {
     const prefixes = getGlobals("prefixes") || {};
 
     for (const [prefix, uri] of Object.entries(prefixes)) {
-      if (value.startsWith(uri)) {
-        return value.replace(uri, `${prefix}:`).replace('<empty>','').replaceAll("/", "/​");
-      }
+        value = value.replaceAll("/​", "/").replaceAll(uri, `${prefix}:`).replaceAll('<empty>','').replaceAll("/", "/​");
     }
+//    return value;
     return value.replaceAll("/", "/​");
   }
 }
 
-function relevantPart(string) {
-  const parts = string.split(/[/#]/);
-  return parts[parts.length - 1];
-}
 
-
-
-
+/**
+ * Creates human-readable labels from URIs or values
+ * @param {string|Object} value - URI string or object containing URIs
+ * @returns {string|Array} Human-readable label or array for objects
+ */
 function createLabel(value) {
   if (value == undefined) return "";
+  let vals = value.replace(/<<( *)/g, '" ').replace(/( *)>>/g, ' "').split(/ +/);
+  let result = vals.map(val => {
+    if (typeof val == 'object') {
+      return Object.entries(val).map(([key, val]) => [key, createLabel(val.value)]);
+    } else {
+      const labels = getGlobals('labels'); 
+      if (labels[val]) return labels[val] ;
+
+      const lastSegment = val.split(/[:/#]/).pop();
+      const words = lastSegment.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+      let a = words.split(' ').map(word => (word.charAt(0).toUpperCase() + word.slice(1))).join(' ');
+      return a;
+    }
+  }).join(' ');
+  return result;
+  /*
   if (typeof value == 'object') {
     return Object.entries(value).map(([key, val]) => [key, createLabel(val.value)]);
   } else {
     const labels = getGlobals('labels'); 
     if (labels[value]) return labels[value] ;
     
-    const lastSegment = value.split(/[:/#_]/).pop();
-    const words = lastSegment.replace(/([a-z])([A-Z])/g, '$1 $2');
-    return words.charAt(0).toUpperCase() + words.slice(1);
+    const lastSegment = value.split(/[:/#]/).pop();
+    const words = lastSegment.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+    return words.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   }
+    */
 }
 
+/**
+ * Parses label definitions from text format
+ * @param {string} text - Text containing label definitions in format "URI 'label'"
+ * @returns {Object} Object mapping URIs to labels
+ */
 export function parseLabels(text) {
   const labels = {};
   text.split("\n").forEach((line) => {
@@ -369,6 +341,11 @@ export function parseLabels(text) {
   return labels;
 }
 
+/**
+ * Parses prefix definitions from text format
+ * @param {string} prefixes - Text containing prefix definitions in format "prefix URI"
+ * @returns {Object} Object mapping prefixes to URIs
+ */
 export function parsePrefixes(prefixes) {
     const lines = prefixes.split("\n"); // Split the text into lines
     const result = {};
@@ -382,45 +359,37 @@ export function parsePrefixes(prefixes) {
   
     return result;
   }
+  /**
+   * Formats prefix object into text representation
+   * @param {Object} prefixes - Object mapping prefixes to URIs
+   * @returns {string} Text representation in format "prefix URI"
+   */
   export function formatPrefixes(prefixes) {
     return Object.entries(prefixes)
       .map(([prefix, uri]) => `${prefix} ${uri}`)
       .join("\n");
   }
+  /**
+   * Formats prefix object into SPARQL PREFIX declarations
+   * @param {Object} prefixes - Object mapping prefixes to URIs
+   * @returns {string} SPARQL PREFIX declarations
+   */
   export function formatPrefixesInSparql(prefixes) {
     return Object.entries(prefixes)
       .map(([prefix, uri]) => `PREFIX ${prefix=='<empty>'?'':prefix}: <${uri}>`)
       .join("\n");
   }
   
+/**
+ * Formats labels object into text representation
+ * @param {Object} labels - Object mapping URIs to labels
+ * @returns {string} Text representation in format 'URI "label"'
+ */
 export function formatLabels(labels) {
   return Object.entries(labels)
     .map(([uri, label]) => `${uri} "${label}"`)
     .join("\n");
 }
-
-export function extractLabels(bindings) {
-    const LABEL_PREDICATE = "http://www.w3.org/2000/01/rdf-schema#label";
-  
-    // Extract labels from bindings
-    const newLabels = bindings
-      .filter((binding) => binding.p?.value === LABEL_PREDICATE)
-      .reduce((acc, binding) => {
-        const subject = binding.s?.value || "";
-        const object = binding.o?.value || "";
-  
-        if (subject && object && !acc[subject]) {
-          acc[subject] = object;
-        }
-        return acc;
-      }, {});
-  
-    // Merge with existing labels
-    const existingLabels = getGlobals("labels") || {};
-    const mergedLabels = { ...existingLabels, ...newLabels };
-  
-    return mergedLabels
-  }
 
   Handlebars.registerHelper("count", (value) => {
     let count = 0;
@@ -436,21 +405,12 @@ export function extractLabels(bindings) {
     countLeaves(value.content);
     return count;
   });
-  Handlebars.registerHelper("debug", (value) => JSON.stringify(value, null, 2)) ;
   Handlebars.registerHelper("join", (value) => value.join(" ")) ;
   Handlebars.registerHelper("addOne", (value) => value + 1) ;
   Handlebars.registerHelper('hasItems', function(obj) { return obj && Object.keys(obj).length > 0; });
   Handlebars.registerHelper("eq", function(a, b) { return a === b ; });
   Handlebars.registerHelper("neq", function(a, b) { return a !== b ; });
   Handlebars.registerHelper("typeof", function(value) { return typeof value; });
-  Handlebars.registerHelper("endsWith", function(a, b) { return a.substr(-1*b.length) == b; });
-  Handlebars.registerHelper("keys", function(obj) { return Object.keys(obj); });
-  Handlebars.registerHelper("first", function(array) { return array[0]; });
-  Handlebars.registerHelper("isFirstNonDec", function(key, obj) {
-    const keys = Object.keys(obj);
-    const firstNonDec = keys.find(k => k !== "dec");
-    return key === firstNonDec;
-  });
   Handlebars.registerHelper('allValues', function(v) {
     if (!v) return "";
     return Array.from(v).join(" ");
@@ -472,32 +432,48 @@ export function extractLabels(bindings) {
   Handlebars.registerHelper('eachSorted', function(obj, options) {
     const array = Object.keys(obj);
     const sorted = array.sort((a, b) => {
-        if (a === "<default>") return -1;
-        if (b === "<default>") return 1;
-
-        const Ashared = a.includes("shared");
-        const Bshared = b.includes("shared");
+        // Get dec property for comparison
+        const getDecProp = (key) => obj[key]?.dec || new Set();
+        const aDecProp = getDecProp(a);
+        const bDecProp = getDecProp(b);
         
-        if (Ashared && !Bshared) return 1;
-        if (!Ashared && Bshared) return -1;
+        // Define sorting order
+        const getSortOrder = (key, decProp) => {
+            if (key === "<default>") return 0;
+            if (decProp.has("epistemicWorld") ) return 1;
+            if (decProp.has("conjecturalWorld")) return 2;
+            if (decProp.has("doxasticWorld") && !decProp.has("delusionalWorld")) return 3;
+            if (decProp.has("doxasticWorld") && decProp.has("delusionalWorld")) return 4;
+            if (decProp.has("verbatimWorld")) return 5;
+            if (decProp.has("sharedWorld")) return 6;
+            if (key === "decStatements") return 7;
+            return 8; // fallback for other items
+        };
         
+        const aOrder = getSortOrder(a, aDecProp);
+        const bOrder = getSortOrder(b, bDecProp);
+        
+        if (aOrder !== bOrder) {
+            return aOrder - bOrder;
+        }
+        
+        // If same order, sort alphabetically
         return a.localeCompare(b);
     });
     return sorted.map((key, index) => options.fn(obj[key], { data: { index, key } })).join('');
 }); 
 
+
+
+/**
+ * Custom HTML element for collapsible sections
+ * @extends HTMLElement
+ */
 class CollapseElement extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
-        this.addEventListener('click', handleCodeClick);
-    }
-
-    showVideo(videoId) {
-        const iframe = this.shadowRoot.querySelector('#iframe');
-        if (iframe) {
-            iframe.src = "https://www.youtube.com/embed/" + videoId;
-        }
+//        this.addEventListener('click', handleCodeClick);
     }
 
     connectedCallback() {
@@ -544,6 +520,10 @@ class CollapseElement extends HTMLElement {
 }
 customElements.define('fv-collapse', CollapseElement);
 
+/**
+ * Custom HTML element for SPARQL code blocks with Try/Edit buttons
+ * @extends HTMLElement
+ */
 class FvSparql extends HTMLElement {
     constructor() {
         super();
@@ -555,32 +535,41 @@ class FvSparql extends HTMLElement {
         const clearDataset = getGlobals("clearDataset");
         this.shadowRoot.innerHTML = `
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
             <link rel="stylesheet" href="viewer.css">
-            <div class="sparql" id="sparql-${this.parentElement.id}">
-                <div class="clearSwitch form-check form-switch">
-                    <input class="form-check-input clearDatasetCheckbox" type="checkbox" id="clearDatasetCheckbox-${this.parentElement.id}" ${clearDataset ? 'checked' : ''}>
-                    <label class="form-check-label clearDatasetLabel" for="clearDatasetCheckbox-${this.parentElement.id}">Clear</label>
+            <div class="sparql" id="sparql-${this.parentElement.id}" style="position: relative;">
+                <div class="sparql-buttons" style="position: sticky; top: 0; right: 0; z-index: 1000; display: flex; flex-direction: column; gap: 2px; float: right;">
+                    <button class="btn btn-sm btn-outline-primary try-button" type="button" style="font-size: 0.7rem; padding: 2px 6px;">
+                        Try
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary edit-button" type="button" style="font-size: 0.7rem; padding: 2px 6px;">
+                        Edit
+                    </button>
                 </div>
                 <pre>${content}</pre>
             </div>
         `;
 
-        // Add event listener to the checkbox
-        const checkbox = this.shadowRoot.querySelector('.clearDatasetCheckbox');
-        checkbox.addEventListener('change', (e) => {
-            // Dispatch a custom event that bubbles up to the main document
-            const event = new CustomEvent('clearDatasetChange', {
-                bubbles: true,
-                composed: true,
-                detail: { checked: e.target.checked }
-            });
-            this.dispatchEvent(event);
+        const tryButton = this.shadowRoot.querySelector('.try-button');
+        tryButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const preElement = this.shadowRoot.querySelector('pre');
+            const data = preElement ? preElement.textContent.trim() : '';
+            const expectDiv = this.parentElement.querySelector('.expect');
+            startQuery(data, expectDiv);
+        });
+
+        const editButton = this.shadowRoot.querySelector('.edit-button');
+        editButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const preElement = this.shadowRoot.querySelector('pre');
+            const data = preElement ? preElement.textContent.trim() : '';
+            const expectDiv = this.parentElement.querySelector('.expect');
+            appendData(data, expectDiv);
         });
     }
 }
 customElements.define('fv-sparql', FvSparql);
-
-// Add this near the top of the file with other event listeners
 
 Handlebars.registerHelper('renderValue', function(value) {
   if (typeof value === 'string') {

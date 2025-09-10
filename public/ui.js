@@ -19,7 +19,9 @@ import { setGlobals, getGlobals, query, update } from './main.js';
 import { formatLabels, parseLabels, parsePrefixes, formatPrefixes, filterAndSort, groupData } from './app.js';
 
 
-/** Add Event Listeners */
+/**
+ * Sets up all event listeners for the application
+ */
 export function setupListeners() {
   $("#queryTextarea").addEventListener("change", handleQueryInput);
   $("#updateTextarea").addEventListener("change", handleUpdateInput);
@@ -39,7 +41,10 @@ export function setupListeners() {
 }
 
 
-/** Update the UI based on global variables */
+/**
+ * Updates the UI based on global variables
+ * @param {Array<string>} [elements=[]] - Array of specific elements to update. If empty, updates all elements
+ */
 export function updateUI(elements = []) {
 	const isError = !!getGlobals('isError') ;
 	if (elements.length === 0 || elements.includes("prefixes")) updatePrefixesTextarea(isError);
@@ -54,7 +59,9 @@ export function updateUI(elements = []) {
 	if (elements.length === 0 ) updateExamplesList();
 }
 
-/** XXX Do we still need this?  */
+/**
+ * Handles modal focus management - removes focus from modal elements when hidden
+ */
 document.addEventListener('DOMContentLoaded', function() {
   // Handle modal focus
   const modals = document.querySelectorAll('.modal');
@@ -69,40 +76,63 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-/** Event Handlers */
+/**
+ * Handles query textarea input changes
+ * @param {Event} event - Input change event
+ */
 function handleQueryInput(event) {
   setGlobals({ query: event.target.value });
   updateUI(["query"]);
 }
 
+/**
+ * Handles update textarea input changes
+ * @param {Event} event - Input change event
+ */
 function handleUpdateInput(event) {
   setGlobals({ update: event.target.value });
   updateUI(["update"]);
 }
 
+/**
+ * Handles query button click - executes SPARQL query
+ */
 async function handleQueryButtonClick() {
-  const data = await query();
+  await query();
   updateUI()
 }
 
+/**
+ * Handles update button click - executes SPARQL update
+ */
 async function handleUpdateButtonClick() {
-  const data = await update();
+  await update();
   updateUI(["rawOutput", "bindings", "groupedBindings"]);
   $('#grouped-bindings-tab-button').click(); 
 }
 
+/**
+ * Handles prefixes modal close - parses and saves prefix definitions
+ */
 function handlePrefixesInput() {
   const prefixes = parsePrefixes($("#prefixesTextarea").value);
   setGlobals({ prefixes });
   updateUI(["prefixes"]);
 }
 
+/**
+ * Handles labels modal close - parses and saves label definitions
+ */
 function handleLabelsInput() {
   const labels = parseLabels($("#labelsTextarea").value);
   setGlobals({ labels });
   updateUI(["labels"]);
 }
 
+/**
+ * Handles clear dataset checkbox changes - syncs all checkboxes
+ * @param {Event} e - Change event from checkbox
+ */
 function handleClearDatasetCheckbox(e) {
   const clearDataset = e.detail ? e.detail.checked : e.target.checked;
   
@@ -115,31 +145,48 @@ function handleClearDatasetCheckbox(e) {
   });
 }
 
-/** UI Update Functions */
+/**
+ * Updates the prefixes textarea with current prefix definitions
+ */
 function updatePrefixesTextarea() {
   const prefixes = getGlobals("prefixes") || {};
   const formattedPrefixes = formatPrefixes(prefixes);
   $("#prefixesTextarea").value = formattedPrefixes;
 }
 
+/**
+ * Updates the labels textarea with current label definitions
+ */
 function updateLabelsTextarea() {
   const labels = getGlobals("labels") || {};
   const formattedLabels = formatLabels(labels);
   $("#labelsTextarea").value = formattedLabels;
 }
 
+/**
+ * Updates the query textarea with current query text
+ */
 function updateQueryTextarea() {
   $("#queryTextarea").value = getGlobals("query") || "";
 }
 
+/**
+ * Updates the footer text content
+ */
 async function updateFooter() {
     $("#footerText").innerHTML = CONFIG.FOOTER || "";
   }
 
+/**
+ * Updates the info accordion content
+ */
 async function updateInfoAccordion() {
     $("#infoContent").innerHTML = getGlobals("info") || "";
 }
   
+/**
+ * Updates the examples list content
+ */
 async function updateExamplesList() {
   $("#examplesContent").innerHTML = getGlobals("examples") || "";
 }
@@ -194,6 +241,11 @@ function updateGroupedBindings(error) {
   }
 }
 
+/**
+ * Appends data to update textarea and opens add data section
+ * @param {string} data - SPARQL data to append
+ * @param {HTMLElement} expect - Expected result element
+ */
 export function appendData(data, expect) {
   const currentTextareaValue = $("#updateTextarea").value;
   if (currentTextareaValue!==data) {
@@ -202,12 +254,30 @@ export function appendData(data, expect) {
     $("#updateTextarea").value = data;
     $("#undoButton").disabled = false;
   }
-//  $('#addDataButton').click();
+  $('#addDataButton').click();
+}
+
+/**
+ * Starts a query with provided data and updates explanation
+ * @param {string} data - SPARQL data to query
+ * @param {HTMLElement} expect - Expected result element
+ */
+export function startQuery(data, expect) {
+  const currentTextareaValue = $("#updateTextarea").value;
+  if (currentTextareaValue!==data) {
+    setGlobals({ undoValue: currentTextareaValue });
+    setGlobals({ update: data });
+    $("#updateTextarea").value = data;
+    $("#undoButton").disabled = false;
+  }
   $('#updateButton').click();
   $$('.explanation').forEach(i => i.innerHTML = expect?.innerHTML || "")
 }
 
-/** Event Handlers */
+/**
+ * Handles clicks on code elements - appends code to update textarea
+ * @param {Event} event - Click event
+ */
 export function handleCodeClick(event) {
     const target = event.composedPath()[0];
     const sparql = event.composedPath()[4];
@@ -218,6 +288,9 @@ export function handleCodeClick(event) {
     }
 }
 
+/**
+ * Undoes the last update textarea change
+ */
 export function undo() {
   const undoValue = getGlobals("undoValue");
   const currentTextareaValue = $("#updateTextarea").value;
@@ -225,16 +298,28 @@ export function undo() {
   $("#updateTextarea").value = undoValue;
 }
   
+/**
+ * Handles render style slider changes
+ * @param {Event} e - Input change event
+ */
  function handleRenderStyleSliderChange(e) {
     const value = e.target.value;
     updateSliders({renderStyle: value});
 };
 
+/**
+ * Handles filter slider changes
+ * @param {Event} e - Input change event
+ */
 function handleFilterSliderChange(e) {
   const value = e.target.value;
   updateSliders({filter: value});
 }
 
+/**
+ * Updates slider positions and applies filtering/rendering changes
+ * @param {Object} config - Configuration object with renderStyle and/or filter properties
+ */
 function updateSliders(config) {
   const renderStyle = config.renderStyle ? config.renderStyle : getGlobals("renderStyle");
   const filter = config.filter ? config.filter : getGlobals("filter");
@@ -265,6 +350,10 @@ function updateSliders(config) {
     updateUI(["bindings", "groupedBindings"]);
 }
 
+/**
+ * Handles table sorting by column headers
+ * @param {Event} e - Click event on table header
+ */
 export function sortTable(e) {
   const currentSort = getGlobals("sort");
   const newSort = e.target.innerText;
@@ -280,8 +369,3 @@ export function sortTable(e) {
   updateUI(["bindings", "groupedBindings"]);  
 }
 
-window.showVideo = function (s) {
-	const iframe = document.querySelector('#CigniBalaka-body')
-		.shadowRoot.querySelector('#iframe');
-	iframe.src = "https://www.youtube.com/embed/" + s;
-};

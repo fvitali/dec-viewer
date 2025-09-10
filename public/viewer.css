@@ -24,6 +24,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     --bs-body-font-family: "Roboto", Verdana, Geneva, Tahoma, sans-serif;
     --bs-font-monospace: "Source Code Pro", monospace;
     --bs-body-font-size: 12pt;
+    --border-width: 0.3em;
 }
 
 :root {
@@ -35,7 +36,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     --argentinian-blue: #6ab4f1ff;
     --lavender-floral: #a983d8ff;
     --lavender-floral-light: #d8c8f8;
-    --transparent-light: #ffffff99;
+    --transparent-light: #ffffff66;
 
 
     --normal-font-color: #333333;
@@ -46,8 +47,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
     --doxastic-color: var(--atomic-tangerine);
     --epistemic-color: var(--light-green);
     --conjectural-color: var(--lavender-floral-light);
-    --schema-color: var(--argentinian-blue);
-    --schema-font-color: var(--inverse-font-color);
+    --delusional-color: red;
+    --decStatements-color: var(--argentinian-blue);
+    --decStatements-font-color: var(--inverse-font-color);
 
 }
 
@@ -82,6 +84,10 @@ main {
     border-right: 1px solid #dee2e6;
 }
 
+.accordion-button:not(.collapsed) {
+    font-weight: bold;
+}
+
 .tab-content-container {
     display: flex;
     flex-direction: column;
@@ -107,6 +113,12 @@ main {
     font-size: 110%;
     font-weight: bold; 
 }
+
+#infoContent h3 {
+    font-size: 100%;
+    font-weight: bold; 
+}
+
 
 #infoContent * {
     font-size: 10pt;
@@ -153,7 +165,7 @@ main {
 }
 
 .graph {
-padding-block: 0.5em; 
+padding-block: 0.2em; 
 padding-inline: 0.5em;
 
 }
@@ -185,19 +197,30 @@ padding-inline: 0.5em;
     padding-inline: 0.5em;
 }
 
-.group .graph  { background-color: var(--normal-color); }
-.triple.verbatimPredicate, .group.verbatimUniverse .graph { background-color: var(--verbatim-color); }
-.triple.doxasticPredicate, .group.doxasticUniverse .graph  { background-color: var(--doxastic-color); }
-.triple.epistemicPredicate, .group.epistemicUniverse .graph  { background-color: var(--epistemic-color); }
-.triple.conjecturalPredicate, .group.conjecturalUniverse .graph  { background-color: var(--conjectural-color); }
-.triple.sharedPredicate, .group.sharedUniverse .graph  { 
+.group .graph  { --bgcolor: var(--normal-color); background-color: var(--bgcolor); border: var(--border-width) solid var(--bgcolor); }
+.triple.verbatimPredicate, .group.verbatimWorld .graph { --bgcolor: var(--verbatim-color); background-color: var(--bgcolor); }
+.triple.doxasticPredicate, .group.doxasticWorld .graph  { --bgcolor: var(--doxastic-color); background-color: var(--bgcolor); }
+.triple.epistemicPredicate, .group.epistemicWorld .graph  { --bgcolor: var(--epistemic-color); background-color: var(--bgcolor); }
+.triple.conjecturalPredicate, .group.conjecturalWorld .graph  { --bgcolor: var(--conjectural-color); background-color: var(--bgcolor); }
+#group-decStatements  { --bgcolor: var(--decStatements-color); background-color: var(--bgcolor); }
+.triple.sharedPredicate, .group.sharedWorld .graph  { 
     background: var(--maize);
     background: color-mix(in srgb, var(--transparent-light), var(--maize) );
 }
-.sharedUniverse {
+.triple.delusionalPredicate, .group.delusionalWorld .graph  { 
+    border: 5px solid;
+    border-image: repeating-linear-gradient(
+        -45deg,
+        var(--delusional-color) 0px,
+        var(--delusional-color) var(--border-width),
+        var(--bgcolor) var(--border-width),
+        var(--bgcolor) calc(var(--border-width) * 2)
+    ) 8;
+}
+.sharedWorld {
     background-color: var(--shared-color);
 }
-.statement.sharedUniverse *, .predicate.sharedUniverse * {
+.statement.sharedWorld *, .predicate.sharedWorld * {
     background-color: transparent !important;
 }
 
@@ -308,16 +331,26 @@ fv-collapse {
     display: flex;
     float: right;
 }
-
-.sparql .clearDatasetLabel {
-    margin: auto;
-    padding-left: 0.2em;
-    font-size: 0.8em;
-}
 .comment {
     font-size: 0.8em;
     color: gray;
     font-style: italic;
+}
+
+.comment ul, .comment p {
+    margin-block: 0.3em;
+}
+
+.comment .decoration {
+    float:right; 
+    display: inline-block; 
+    width: 50%; 
+    padding: 0.5em;
+}
+
+.decoration img {
+    max-width: 100%;
+    height: auto;
 }
 
 .collapse .expect {
@@ -649,4 +682,12 @@ pre.error {
     color: black;
     text-decoration: none;
 }
+
+.sparql-buttons {
+    position: sticky;
+    display: flex ;
+    flex-direction: column;
+    gap: 0.2em;
+    width: 4em;
+    margin-left: auto;}
 

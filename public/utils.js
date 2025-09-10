@@ -17,18 +17,40 @@
 
 // Utility functions
 
+/**
+ * Pretty-prints an object to console as formatted JSON
+ * @param {*} i - Object to print
+ */
 export function p(i) {
     console.log(JSON.stringify(i,null,2)) 
 }
 
+/**
+ * Returns the first element that matches the selector
+ * @param {string} selector - CSS selector
+ * @param {Document|Element} [context=document] - Context to search within
+ * @returns {Element|null} First matching element or null
+ */
 export function $(selector, context = document) {
     return context.querySelector(selector);
   }
   
+  /**
+   * Returns all elements that match the selector as an array
+   * @param {string} selector - CSS selector
+   * @param {Document|Element} [context=document] - Context to search within
+   * @returns {Array<Element>} Array of matching elements
+   */
   export function $$(selector, context = document) {
     return Array.from(context.querySelectorAll(selector));
   }
   
+  /**
+   * Returns all elements that match the selector, including those in shadow DOMs
+   * @param {string} selector - CSS selector
+   * @param {Document|Element} [context=document] - Context to search within
+   * @returns {Array<Element>} Array of matching elements from regular DOM and shadow DOMs
+   */
   export function $$$(selector, context = document) {
     const results = new Set();
   

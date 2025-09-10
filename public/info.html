@@ -13,27 +13,39 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
 OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 -->
-<h1>DEC Viewer and DEC Reasoner</h1>
+<h2>What is DEC Viewer?</h2>
 
-<p>DEC Viewer is a web application providing access to a DEC reasoner over a quad store using Fuseki 4.8.0. </p>
+<p>DEC Viewer is a web application providing access to a reasoner for cognitive worlds over a quad store using Fuseki 4.8.0. </p>
 
-<h2>DEC modal logics</h2>
-<p>DEC stands for Doxastic, Epistemic, and Conjectural, three types of modal logic meant to characterize the subjective state of mind of one or more actors holdings beliefs, concepts and hypothesis over reality, such as "Alice believes that John is a painter" or "Bruce knows that painters are artists." or "Catherine supposes John painted 'Still life #13'." The DEC Reasoner is able to carry out inferences on objective and subjective assertions expressed in RDF. </p>
+<h3>DEC cognitive worlds</h3>
+<p>DEC stands for Doxastic, Epistemic, and Conjectural, three types of cognitive worlds meant to characterize the subjective state of mind of one or more actors holding beliefs, concepts and hypotheses over reality. Examples are "Alice believes that John is a painter" or "Bruce knows that painters are artists." or "Catherine supposes John painted 'Still life #13'." The DEC Reasoner is able to carry out inferences on objective and subjective assertions like these when expressed in RDF. </p>
 
-<p>Doxastic, Epistemic and Conjectural are only three (although, arguably, the most significant) reasoning models supported by the DEC Reasoner, but in the current implementation we actuallu support nine of them. These models are distinguished by how they address objective and subjective statements, according to one or more axioms used in modal logic. This in turn corresponds to different types of subjective states and their impact on reality and with other states:</p>
+<p>Cognitive worlds are sets of statements, isolated from each other (and, in general, from reality), which are held for true, or abstractly considered for evaluation, by a cognitive agent or within a given cognitive contest. The exact nature of the cognitive world is given by a predicate connecting the agent (or the context) to the cognitive world, and is determined by the nature of the governing verb:</p>
 
 <ul>
-	<li><b>Verbatim model</b>: this is meant to represent statements exactly as expressed, with no inferences carried out. A reasonable governing verb is "say": if someone says something, she says exactly this, and not anything further that can be logically implicated by her sentences. Therefore objective statements are exposed to inferences as usual, while subjective statements are not processed and remain unchanged.</li>
-	<li><b>Doxastic model</b>: this is meant to represent subjective stances that are independent of reality, and possibly in contrast with it. This includes beliefs, opinions or delusions. The usual governing verb is "believe" or "think": when someone believes something, that something may or may not be actually true, but she (being a rational actors) must believe also everything that can be logically implicated by this. Therefore objective statements are exposed to inferences as usual and are considered objective as well, and so are subjective statements, whose inferences are then added as subjective statements as well. </li>
-	<li><b>Epistemic model</b>: this is meant to represent subjective stances that are part of reality, and never in contrast with it. This includes knowledge, discoveries, judgments. The usual governing verb is "know" or "decide": when someone knows something, that something must be actually true, and she (being a rational actors) must believe also everything that can be logically implicated by this, which also happen to be true. On the other hand, she might know fewer things than reality. Therefore subjective statements are exposed to inferences as usual and are considered subjective as well, but are all then added and considered part of the set of objective statements which are then exposed to inferences as usual.</li>
-	<li><b>Conjectural model</b>: this is meant to represent subjective stances that are based reality, and never in contrast with it, but that suppose something in addition which reality does not consider. This includes conjectures, hypothesis and suppositions. The usual governing verb is "suppose" or "conjecture": when someone suppose something, that something is not known to be neither true nor false, but she (being a rational actors) must consider in the supposition also everything that is known to be true. Thus a conjecture includes everything that is known to be true, plus some more that (at the moment) is not. Therefore objective statements are intermingled with subjective ones and exposed to inferences as part of the supposition, and separately objective statements are also exposed to inference as usual. </li>
-	<li><b>Nirvana model</b>: this is meant to represent a fictional situation in which someone is "one with the universe" (i.e., in Nirvana): there is no distinction between subjective and objective stances: what is real is subjective, and what is subjective is objective. A reasonable governing verb could be "grok" or "attain awareness about". Subjective and objective statements are mingled together, inferences are carried out on the union of the two, and shared equally as subjective and objective at the same time.</li>
-	<li><b>Union graph</b>: Similarly to Nirvana, this model joins outer and inner statements in a single unione graph, and carries out inferences on it. Resulting inferences are considered </b>
-	<li><b>Colored graphs</b>: 
+	<li><b>Doxastic worlds</b> represent subjective stances that are independent of reality, and possibly in contrast with it. These stances include beliefs, opinions or delusions. Example governing verbs are "believe", "be convinced" or "think". There is no connection between what is held as true in a doxastic cognitive world and what is true in reality.</li>
+	<li><b>Epistemic worlds</b> represent subjective stances that have access to a (possibly limited) fragment of reality. These stances include knowledge, discoveries, judgments. Example governing verbs are "know" "be aware" or even "decide". Everything in an epistemic cognitive world is true, but there may be some truths that are not available inside it.</li>
+	<li><b>Conjectural worlds</b> represent subjective stances that are totally based on reality, and include some further assertions that are neither true nor false in reality. These stances include conjectures, hypothesis and suppositions. Example governing verbs are "suppose", "consider", "suspect", "postulate" or "speculate". Everything that is true is available in a conjectural cognitive world, but there may be some additional assertions available inside it that are neither true nor false in reality.</li>
 </ul>
 
-<p>In addition to 
-    
-    
-<h2>DEC Reasoner</h2>    
-<p>The DEC Reasoner operates on subjective statements expressed in either RDF reified triples, rdf* triples, or named graphs, and uses for the actual inferencing another reasoner, e.g. an OWL or RDFS reasoner, which can be configured as a parameter of the DEC Reasoner (this installation uses a full OWL reasoner). Objective statements are processed as usual through the base reasoner, and the DEC Reasoner does not modify this behavior.</p>
+<p>The nature of the cognitive world, therefore, determines the reciprocal availability of facts between reality and the world. We call this availability "permeation": statements belonging to a world are added, i.e., <i>permeate</i>, into another. Thus, doxastic worlds do not permeate into reality, nor reality permeates into doxastic worlds; epistemic worlds permeate into reality, but not viceversa; and reality permeates into conjectural worlds, but not viceversa.</p> 
+
+<h3>Disagreements, delusions and opinions</h3> 
+<p>Separation and permeation of statements within cognitive worlds allow to naturally represent disagreements, opinions, and delusions as reciprocal stances between cognitive worlds. Specifically, we say that:</p>
+
+<ul>
+	<li>Two cognitive worlds <b>disagree</b> if they cannot be or become true at the same time, i.e., if they contain reciprocally inconsistent statements. For instance, "Catherine supposes that John painted 'Still life #13'." and "David believes that Mary painted 'Still life #13'." disagree (if we assume that 'Still life #13' is the same painting in both statements, that John and Mary are different individuals and that they did not work together).</li>
+	<li>A cognitive world is <b>delusional</b> if it contains at least one statement that is inconsistent with reality. For instance, "Emily thinks that the Mona Lisa painting is at the Uffizi Museum" is a delusional statement, since it is a fact that Mona Lisa is at the Louvre Museum, and Louvre and Uffizi are different museums.</li>
+	<li>A cognitive world is an <b>opinion</b> if it contains statement that are, and will always be, neither true nor false in reality. For instance, "Frank thinks that pizza is better than sushi" is an opinion because neither this assertion nor its negation will ever be accepted as a fact.</li>
+</ul>
+
+<h3>Other cognitive worlds</h3> 
+
+<p>Doxastic, Epistemic and Conjectural are the most meaningful cognitive worlds supported by the DEC Reasoner, but  there are three further worlds that must be considered: 
+	<ul>
+		<li><b>Shared worlds</b>: every statement placed inside a shared world is also available in all other cognitive worlds (and reality), without the need to repeat the statement more than once. For instance, "Mona Lisa is a painting" should probably belong to a shared world. Shared world do not contain all the facts, but only all the statements that every world, including delusional ones, is aware of.</li>
+		<li><b>Reality</b>: every statement placed outside of any cognitive world belong to a special cognitive world, that we call reality. Under the DEC reasoning model, statements of reality, or <i>facts</i>, are true or false regardless of how or whether they are considered as such in any other cognitive world.</li>
+		<li><b>Verbatim worlds</b> represent subjective stances that must remain precisely as presented, with no reasoning allowed, nor permeations from other worlds. These stances include the exact representation of speeches and writings. Example governing verbs are "said" or "wrote". No inferences, not even obvious ones, are allowed on verbatim worlds. By default, rdf star triples and reification statements are considered verbatim. 
+	</ul>
+
+

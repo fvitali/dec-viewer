@@ -1,14 +1,17 @@
 {
     "http://www.w3.org/2000/01/rdf-schema#subClassOf": "is a type of",
     "http://www.w3.org/2000/01/rdf-schema#Resource": "Resource",
-    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "are",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "is of type",
     "http://www.w3.org/2001/XMLSchema#String": "string",
     "http://www.w3.org/2000/01/rdf-schema#Class": "RDFS Class",
     "http://www.w3.org/2000/01/rdf-schema#range": "has range among",
     "http://www.w3.org/2002/07/owl#Class": "OWL Class",
-    "http://www.w3.org/2002/07/owl#equivalentClass": "are equivalent to",
+    "http://www.w3.org/2002/07/owl#equivalentClass": "is equivalent to",
     "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": "is a subproperty of",
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property": "property",
     "http://www.w3.org/2002/07/owl#Thing": "Entity",
-    "http://www.w3.org/2002/07/owl#sameAs": "identical to"
+    "http://www.w3.org/2002/07/owl#sameAs": "identical to",
+    "http://purl.org/dc/elements/1.1/date": "dates to",
+    "http://purl.org/dc/elements/1.1/coverage": "covers",
+    "http://purl.org/dc/elements/1.1/creator": "was created by"
 }

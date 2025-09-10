@@ -15,13 +15,17 @@
  */
 
 import { updateUI, setupListeners, sortTable } from './ui.js';
-import { extractLabels, parsePrefixes, formatPrefixesInSparql, analyzeBindings, filterAndSort } from './app.js';
+import { parsePrefixes, formatPrefixesInSparql, analyzeBindings, filterAndSort } from './app.js';
 export { sortTable } from './ui.js';
 
-/** Initialize Application */
+/**
+ * Initialize Application - sets up event listeners and loads initial data
+ */
 document.addEventListener("DOMContentLoaded", init);
 
-/** Initialization */
+/**
+ * Initializes the application by loading settings, setting up listeners, and updating UI
+ */
 async function init() {
   // Load default settings first
   await setDefaultSettings();
@@ -46,7 +50,10 @@ async function init() {
   updateUI();
 }
 
-/** Execute Query */
+/**
+ * Executes a SPARQL query against the server
+ * @returns {Object|boolean} Query results object or false on error
+ */
 export async function query() {
   const queryText = getGlobals("query");
 
@@ -79,7 +86,10 @@ export async function query() {
   }
 }
 
-/** Execute Update */
+/**
+ * Executes a SPARQL update operation against the server
+ * @returns {Object|boolean} Update results object or false on error
+ */
 export async function update() {
   const prefixes = formatPrefixesInSparql(getGlobals('prefixes'))
   const updateText = getGlobals("update");
@@ -120,7 +130,10 @@ export async function update() {
   }
 }
 
-/** Modify Global Variables */
+/**
+ * Updates global variables and saves settings to localStorage
+ * @param {Object} updates - Object containing key-value pairs to update
+ */
 export function setGlobals(updates) {
   // Do not place bindings in saved settings
     if (updates && updates.hasOwnProperty("bindings")) {
@@ -146,7 +159,11 @@ export function setGlobals(updates) {
     saveSettings();
   }
 
-/** Retrieve a Global Variable */
+/**
+ * Retrieves a global variable value
+ * @param {string} [key] - Key of the global variable to retrieve. If not provided, returns all globals
+ * @returns {*} The value of the requested global variable or all globals object
+ */
 export function getGlobals(key) {
     if (key=="bindings") return window.bindings;
     if (key=="filtered") return window.filtered;
@@ -155,7 +172,9 @@ export function getGlobals(key) {
     return window.globals ;
   }
 
-/** Save Settings to Local Storage */
+/**
+ * Saves selected global settings to localStorage
+ */
 function saveSettings() {
     const keysToSave = ["query","prefixes","labels", "renderStyle", "filter", "sort","clearDataset"];
     const filteredGlobals = Object.fromEntries(
@@ -164,7 +183,9 @@ function saveSettings() {
     localStorage.setItem(CONFIG.NAME, JSON.stringify(filteredGlobals));
   }
 
-/** Default Settings */
+/**
+ * Sets up default application settings and loads initial resources
+ */
 async function setDefaultSettings() {
   window.globals = {
     query: CONFIG.DEFAULT_QUERY,
@@ -179,7 +200,7 @@ async function setDefaultSettings() {
     undoValue: ""
   };
   window.bindings = [];  
-  window.rawOutput = "";
+//  window.rawOutput = "";
 
   try {
     const [examplesResponse, infoResponse, prefixesResponse, labelsResponse] = await Promise.all([

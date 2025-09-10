@@ -21,7 +21,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 	<title>DEC Viewer</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">	
+	<link rel="preload" href="/fonts/Roboto.ttf" as="font" type="font/ttf" crossorigin>
+	<link rel="preload" href="/fonts/SourceCodePro.ttf" as="font" type="font/ttf" crossorigin>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="viewer.css">
@@ -57,9 +58,32 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 		<div class="accordion" id="leftAccordion">
 		<!-- Info Section -->
 		<div class="accordion-item">
+			<h2 class="accordion-header" id="aboutHeading">
+			<button class="accordion-button" id="aboutButton" type="button" data-bs-toggle="collapse" data-bs-target="#aboutCollapse" aria-expanded="true" aria-controls="aboutCollapse">
+				About...
+			</button>
+			</h2>
+			<div id="aboutCollapse" class="accordion-collapse collapse show" aria-labelledby="aboutHeading" data-bs-parent="#leftAccordion">
+				<div class="accordion-body" id="aboutContent">
+					<p>This application allows to test and evaluate DEC reasoning 
+					using a custom reasoning extension to Fuseki. </p>
+					<ul>
+						<li>Click on "Introduction" for some information about what we mean with DEC reasoning for cognitive worlds and 
+							what it can do.</li>
+						<li>Click on "Examples" to try or edit many examples of cognitive worlds and disagreements.</li>
+						<li>Click on "Edit data" to modify an existing example or test the DEC engine with your own. </li>
+						<li>The "Show" slider controls whether to show the full URI of the RDF quads, to use prefixes, or to use readable labels</li>
+						<li>The "Hide" slider controls whether to show all the RDF quads of the responses, or to filter out quads whose subject
+							belong to the RDF, RDFS, OWl or XSD namespaces, or to filter out also all triples that are shared across all cognitive worlds.</li>
+						<li>Click on "Prefixes" and "Labels" to modify default substitutions of RDF prefixes and readabale labels</li>
+				</div>
+			</div>
+		</div>
+
+		<div class="accordion-item">
 			<h2 class="accordion-header" id="infoHeading">
 			<button class="accordion-button collapsed" id="infoButton" type="button" data-bs-toggle="collapse" data-bs-target="#infoCollapse" aria-expanded="true" aria-controls="infoCollapse">
-				Info
+				Introduction
 			</button>
 			</h2>
 			<div id="infoCollapse" class="accordion-collapse collapse" aria-labelledby="infoHeading" data-bs-parent="#leftAccordion">
@@ -83,10 +107,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 		<div class="accordion-item">
 			<h2 class="accordion-header" id="updateHeading">
 			<button class="accordion-button collapsed"	id="addDataButton"	type="button" data-bs-toggle="collapse" data-bs-target="#updateCollapse" aria-expanded="false" aria-controls="updateCollapse">
-				Add Data
+				Edit data
 			</button>
 			</h2>
-			<div id="updateCollapse" class="accordion-collapse collapse show" aria-labelledby="updateHeading" data-bs-parent="#leftAccordion">
+			<div id="updateCollapse" class="accordion-collapse collapse" aria-labelledby="updateHeading" data-bs-parent="#leftAccordion">
 			<div class="accordion-body d-flex flex-column pt-1">
 				<p class="small text-muted m-0" id="updateLabel">Append RDF data to the dataset in SPARQL Update format.</p>
 				<pre class="m-0">INSERT DATA {</pre>
@@ -127,23 +151,23 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 	<div class="tab-content-container col-6 d-flex flex-column">
 		<nav class="navbar bg-light p-2 mb-2">
 			<div class="d-flex flex-column ms-4 justify-content-center" title="Does not apply to raw output">
-				<div class="text-center">Identifiers</div>
+				<div class="text-center">Show</div>
 				<div class="slider-container">
 					<input type="range" min="0" max="2" step="1" value="0" class="form-range" id="renderStyleSlider">
 					<div class="slider-labels">
-						<span>Full</span>
+						<span>Full URIs</span>
 						<span>Prefixes</span>
 						<span>Labels</span>
 					</div>
 				</div>	
 			</div>
 			<div class="d-flex flex-column me-4 justify-content-center" title="Does not apply to raw output">
-				<div class="text-center">Filters</div>
+				<div class="text-center">Hide</div>
 				<div class="slider-container me-4">
 					<input type="range" min="0" max="2" step="1" value="0" class="form-range" id="filterSlider">
 					<div class="slider-labels">
-						<span>None</span>
-						<span>Schema</span>
+						<span>Nothing</span>
+						<span>OWL/RDFS/XSD</span>
 						<span>Shared</span>
 					</div>
 				</div>
@@ -319,7 +343,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 											{{#if (neq @key "dec")}}
 												<span class="predicate {{allValues this.dec}}">{{render @key}}
 													{{#each v}}
-														<span class="object {{allValues this.dec}}">{{render this.v}}</span>{{#unless @last}},{{/unless}}
+														<span class="object {{allValues this.dec}}">{{render this.v}}{{#unless @last}},{{/unless}}</span>
 													{{/each}}
 												</span>
 											{{/if}}
@@ -330,10 +354,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 				</div>
 				<p class="header">
 					{{#if (neq @key "<default>")}}
-						{{render @key}} contains 
+<!--						{{render @key}} contains 
 						<a href="#" 
 						data-bs-toggle="collapse" 
-						data-bs-target="#group-{{@key}}">{{count this}} statements</a>
+						data-bs-target="#group-{{@key}}">{{count this}} statements</a> -->
 					{{ else }}
 						There are 
 						<a href="#" 
@@ -346,14 +370,14 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 					{{#each this.content}}
 						{{#if (neq @key "dec")}}
 							<li class="statement {{allValues this.dec}}">
-									<span class="subject">{{render @key}}</span>
+									<span class="subject {{allValues this.dec}}">{{render @key}}</span>
 									{{#each this}}
 										{{#if (neq @key "dec")}}
 											<span class="predicate {{allValues this.dec}}">{{render @key}}
 												{{#each v}}
 													{{#if (eq (typeof this.v) "string")}}
-														<span class="object {{allValues this.dec}}">{{render this.v}}</span>
-														{{#unless @last}},{{/unless}}
+														<span class="object {{allValues this.dec}}">{{render this.v}}{{#unless @last}},{{/unless}}</span>
+														
 													{{else}}
 														<span class="triple {{allValues this.dec}}">
 															<span class="s">{{render this.v.subject.value}}</span>
