@@ -19,10 +19,11 @@
 window.CONFIG = {
     NAME: "DEC Viewer",
     SERVER: "",
-    DEFAULT_QUERY: `SELECT DISTINCT ?graph ?s ?p ?o WHERE { 
-      { GRAPH ?graph { ?s ?p ?o } }
-        UNION
-      { ?s ?p ?o }
+    DEFAULT_QUERY: `SELECT DISTINCT ?graph ?s ?p ?o WHERE {
+    VALUES ?p { rdfs:subClassOf rdf:type } 
+    { GRAPH ?graph { ?s ?p ?o } }
+      UNION
+    { ?s ?p ?o }
 }
     `,
     FOOTER: "©2025 Fabio Vitali, fabio.vitali@unibo.it, All rights reserved, version 0.9",
