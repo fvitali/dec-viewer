@@ -107,15 +107,19 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 		<div class="accordion-item">
 			<h2 class="accordion-header" id="updateHeading">
 			<button class="accordion-button collapsed"	id="addDataButton"	type="button" data-bs-toggle="collapse" data-bs-target="#updateCollapse" aria-expanded="false" aria-controls="updateCollapse">
-				Edit data
+				Append data
 			</button>
 			</h2>
 			<div id="updateCollapse" class="accordion-collapse collapse" aria-labelledby="updateHeading" data-bs-parent="#leftAccordion">
 			<div class="accordion-body d-flex flex-column pt-1">
-				<p class="small text-muted m-0" id="updateLabel">Append RDF data to the dataset in SPARQL Update format.</p>
-				<pre class="m-0">INSERT DATA {</pre>
-				<textarea id="updateTextarea" class="form-control w-90 ms-2 me-1" rows="10"></textarea>
-				<pre class="m-0">}</pre>
+				<p class="small text-muted m-0 mb-1" id="updateLabel">Append RDF data to the dataset in SPARQL Update format.</p>
+				<div class="query">
+					<pre class="m-0"><i>[prefixes]</i>
+
+INSERT DATA {</pre>
+					<textarea id="updateTextarea"></textarea>
+					<pre class="m-0">}</pre>
+				</div>	
 				<div class="d-flex mb-2 mt-2" id="updateButtons">
 				<button id="undoButton" class="btn btn-sm btn-secondary me-auto">
 					<i class="bi bi-arrow-counterclockwise"></i> Undo
@@ -134,13 +138,17 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 		<div class="accordion-item">
 			<h2 class="accordion-header" id="queryHeading">
 			<button class="accordion-button collapsed"	id="sparqlButton" type="button" data-bs-toggle="collapse" data-bs-target="#queryCollapse" aria-expanded="false" aria-controls="queryCollapse">
-				SPARQL
+				Query data
 			</button>
 			</h2>
 			<div id="queryCollapse" class="accordion-collapse collapse" aria-labelledby="queryHeading" data-bs-parent="#leftAccordion">
 			<div class="accordion-body d-flex flex-column">
-				<textarea id="queryTextarea" class="form-control w-100 mb-2" rows="10"></textarea>
-				<button id="queryButton" class="btn btn-primary w-100">Query</button>
+				<p class="small text-muted m-0 mb-1" id="updateLabel">Query the dataset with a SPARQL query. <i>(N.B.: the dataset starts empty)</i></p>
+				<div class="query">
+					<pre class="m-0"><i>[prefixes]</i></pre>
+					<textarea id="queryTextarea"></textarea>
+				</div>
+				<button id="queryButton" class="btn btn-primary w-100">Query dataset</button>
 			</div>
 			</div>
 		</div>

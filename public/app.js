@@ -19,21 +19,74 @@ import { appendData, startQuery } from './ui.js';
 import { p } from './utils.js';
 
 
-/**
+    // Normalize bindings to standard graph, s, p, o format
+    function normalizeBinding(b, vars) {
+        // Priority-based semantic mapping
+        const mappings = {
+            graph: ['graph', 'g'],
+            s: ['s', 'subject'],
+            p: ['p', 'predicate'],
+            o: ['o', 'object']
+        };
+        
+        const findVar = (priorities) => priorities.find(name => vars.includes(name));
+        
+        let graphVar = findVar(mappings.graph);
+        let sVar = findVar(mappings.s);
+        let pVar = findVar(mappings.p);
+        let oVar = findVar(mappings.o);
+        
+        if (vars.length === 4) {
+            graphVar = graphVar || vars[0];
+            sVar = sVar || vars[1];
+            pVar = pVar || vars[2];
+            oVar = oVar || vars[3];
+        } else if (vars.length === 3) {
+            sVar = sVar || vars[0];
+            pVar = pVar || vars[1];
+            oVar = oVar || vars[2];
+        } else if (vars.length === 2) {
+            const recognizedVars = [sVar, pVar, oVar].filter(Boolean);
+            if (recognizedVars.length === 0) {
+                sVar = vars[0];
+                pVar = vars[1];
+            } else if (recognizedVars.length === 1) {
+                const usedVar = recognizedVars[0];
+                const remainingVar = vars.find(v => v !== usedVar);
+                if (!sVar && !pVar) { sVar = remainingVar; }
+                else if (!sVar && !oVar) { sVar = remainingVar; }
+                else if (!pVar && !oVar) { pVar = remainingVar; }
+            }
+        } else if (vars.length === 1) {
+            if (!sVar && !pVar && !oVar) {
+                sVar = vars[0];
+            }
+        }
+        b.graph = graphVar ? b[graphVar] : { value: "<default>" };
+        b.s = sVar ? b[sVar] : { value: "<subject>" };
+        b.p = pVar ? b[pVar] : { value: "<predicate>" };
+        b.o = oVar ? b[oVar] : { value: "<object>" };
+    };
+
+  /**
  * Analyzes SPARQL bindings to extract DEC-related metadata
  * @param {Array<Object>} bindings - Array of SPARQL binding objects
  * @returns {Object} Object containing analyzed data with headers, rows, decTypes, shared, labels, and decPredicates
  */
-export function analyzeBindings(bindings) {
-    const rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-    const decNamespace = "http://w3id.org/conjectures/";
-    let decTypes = {};
-    let URIsForShared = [];
-    let shared = [];
-    let labels = {}
-    let decPredicates = {};
 
-    bindings.forEach(b => {
+  export function analyzeBindings(vars,bindings) {
+      const rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+      const decNamespace = "http://w3id.org/conjectures/";
+      let decTypes = {};
+      let URIsForShared = [];
+      let shared = [];
+      let labels = {}
+      let decPredicates = {};
+  
+     bindings.forEach(b => {
+        let x = JSON.parse(JSON.stringify(b));
+        normalizeBinding(b, Object.keys(b));
+
         if (b.p.value === rdfType && b.o.value.startsWith(decNamespace)) {
             const type = b.o.value.split("/").pop();
             if (!decTypes[b.s.value]) decTypes[b.s.value] = [];

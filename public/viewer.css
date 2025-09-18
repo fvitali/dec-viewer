@@ -17,7 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 :root {
     --header-height: 70px;
     --footer-height: 50px;
-    --num-of-accordions: 4;
+    --num-of-accordions: 5;
     --main-height: calc(100vh - var(--header-height) - var(--footer-height));
     --accordion-header-height: 2rem;
     --collapse-height: calc(var(--main-height) - (var(--num-of-accordions) * var(--accordion-header-height)));
@@ -122,13 +122,6 @@ main {
 
 #infoContent * {
     font-size: 10pt;
-}
-
-#queryTextarea, #updateTextarea {
-    width: 100%;
-    font-size: smaller; 
-    font-family: monospace;
-    line-height: 1.2em; 
 }
 
 .query-error {
@@ -236,11 +229,6 @@ padding-inline: 0.5em;
 }
 
 
-
-#bindingsContent {
-    max-height: 50vh;
-}
-
 #bindingsContent table {
     width: 50vw;
     font-size: 0.9rem;
@@ -311,26 +299,6 @@ fv-collapse {
   /* font-weight: bold; */
 }
 
-.sparql pre {
-    display: inline;
-    cursor: pointer;
-    font-size: smaller;
-    line-height: 1.2em; 
-}
-
-.sparql {
-    border: #cccccc 1px solid;
-    width: 100%;
-    padding: 0.5em;
-    max-height: 15em; 
-    overflow-y: auto; 
-    line-height: 0.9em;
-}
-
-.sparql .clearSwitch {
-    display: flex;
-    float: right;
-}
 .comment {
     font-size: 0.8em;
     color: gray;
@@ -510,28 +478,63 @@ fv-collapse {
     overflow: hidden;
 }
 
+.query {
+
+    margin-block: 0.5em;
+    border: 1px solid #dddddd;
+    padding: 0.5em;
+    background-color: #f7f7f7;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.8rem;
+    line-height: 1rem;
+    display: flex ;
+    flex-direction: column;
+    height: 100%;}
+
+.query textarea {
+    background-color: transparent;
+    border: none;
+    margin-inline: 1.5em;
+    width: calc(100% - 3em) !important;
+    font-size: inherit;
+    line-height: inherit;
+}
+.query pre {
+    display: inline;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.query .clearSwitch {
+    display: flex;
+    float: right;
+}
+
+
 /* -------------------------------------- */
 /*                Errors                  */
 /* -------------------------------------- */
 
 .error {
+    display: block;
+    font-family: var(--bs-body-font-family);
     background-color: #ffe6e6; 
     color: #d9534f; 
     padding: 2em;
 }
 
 .error h2 {
-    font-size: 1.5em;
+    font-size: 1.5rem;
     font-weight: bold;
     text-align: center;
 }
 
 .error p {
-    font-size: 0.9em;
+    font-size: 0.9rem;
 }
 
 pre.error {
-    font-size: 0.75em;
+    font-size: 0.75rem;
     white-space: pre-wrap;
 }
 

@@ -55,18 +55,21 @@ async function init() {
  * @returns {Object|boolean} Query results object or false on error
  */
 export async function query() {
+  const prefixes = formatPrefixesInSparql(getGlobals('prefixes'))
   const queryText = getGlobals("query");
+  const payload = [prefixes, queryText].join('\n')
+
 
   try {
     const response = await fetch(CONFIG.SERVER+"sparql", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: queryText.trim() }),
+      body: JSON.stringify({ query: payload.trim() }),
     });
 
     if (!response.ok) throw new Error("Query failed");
     const data = await response.json();
-    const bindings = analyzeBindings(data.results.bindings);
+    const bindings = analyzeBindings(data.head.vars, data.results.bindings);
     const filtered = filterAndSort(bindings.rows, getGlobals("filter"), getGlobals("sort").field, getGlobals("sort").direction);
     setGlobals({ 
         bindings: bindings.rows,
@@ -78,9 +81,11 @@ export async function query() {
     });
     return bindings;
   } catch (error) {
+    console.log(error);
     setGlobals({
-      bindings: `Error: ${JSON.stringify(error.message)}`,
+      bindings: {},
       isError: true,
+      error: error
     });
     return false; 
   }
@@ -108,7 +113,7 @@ export async function update() {
     const data = await response.json();
     if (!response.ok) throw new Error(JSON.stringify(data));
 
-    const bindings = analyzeBindings(data.results.bindings);
+    const bindings = analyzeBindings(data.head.vars, data.results.bindings);
     const filtered = filterAndSort(bindings.rows, getGlobals("filter"), getGlobals("sort").field, getGlobals("sort").direction);
     setGlobals({ 
         bindings: bindings.rows,
@@ -123,8 +128,9 @@ export async function update() {
   } catch (error) {
     console.log(error);
     setGlobals({
-      bindings: (() => { try { return JSON.parse(error.message); } catch { return error.message; } })(),
+      bindings: {},
       isError: true,
+      error: error
     });
     return false; 
   }

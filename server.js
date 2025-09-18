@@ -130,7 +130,8 @@ app.post('/sparql', async (req, res) => {
 		return res.status(response.status || 500).json({ error: response });
 	}
 
-	res.json(response.data);
+//	debug(response);
+	res.json(response);
 });
 
 /* ---------------------------------------------------------- */
@@ -168,6 +169,7 @@ app.post('/update', async (req, res) => {
 		debug(secondResponse)
 		return res.status(secondResponse.status || 500).json(secondResponse);
 	}
+	debug(secondResponse);
 	res.json(secondResponse);
 });
 

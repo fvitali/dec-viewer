@@ -46,17 +46,22 @@ export function setupListeners() {
  * @param {Array<string>} [elements=[]] - Array of specific elements to update. If empty, updates all elements
  */
 export function updateUI(elements = []) {
-	const isError = !!getGlobals('isError') ;
-	if (elements.length === 0 || elements.includes("prefixes")) updatePrefixesTextarea(isError);
-	if (elements.length === 0 || elements.includes("labels")) updateLabelsTextarea(isError);
-	if (elements.length === 0 || elements.includes("query")) updateQueryTextarea(isError);
-  if (elements.length === 0 || elements.includes("slider")) updateSliders(isError);
-	if (elements.length === 0 || elements.includes("rawOutput")) updateRawOutput(isError);
-	if (elements.length === 0 || elements.includes("bindings")) updateBindingsTable(isError);
-	if (elements.length === 0 || elements.includes("groupedBindings")) updateGroupedBindings(isError);
+  if (!!getGlobals('isError')) {
+    updateRawOutput(true);
+    updateBindingsTable(true);
+    updateGroupedBindings(true);
+    return    
+  }
+	if (elements.length === 0 || elements.includes("prefixes")) updatePrefixesTextarea();
+	if (elements.length === 0 || elements.includes("labels")) updateLabelsTextarea();
+	if (elements.length === 0 || elements.includes("query")) updateQueryTextarea();
+  if (elements.length === 0 || elements.includes("slider")) updateSliders();
 	if (elements.length === 0 ) updateFooter();
 	if (elements.length === 0 ) updateInfoAccordion();
 	if (elements.length === 0 ) updateExamplesList();
+  updateRawOutput(false);
+  updateBindingsTable(false);
+  updateGroupedBindings(false);
 }
 
 /**
@@ -148,7 +153,8 @@ function handleClearDatasetCheckbox(e) {
 /**
  * Updates the prefixes textarea with current prefix definitions
  */
-function updatePrefixesTextarea() {
+function updatePrefixesTextarea(error) {
+  if(error) return
   const prefixes = getGlobals("prefixes") || {};
   const formattedPrefixes = formatPrefixes(prefixes);
   $("#prefixesTextarea").value = formattedPrefixes;
@@ -157,7 +163,8 @@ function updatePrefixesTextarea() {
 /**
  * Updates the labels textarea with current label definitions
  */
-function updateLabelsTextarea() {
+function updateLabelsTextarea(error) {
+  if(error) return
   const labels = getGlobals("labels") || {};
   const formattedLabels = formatLabels(labels);
   $("#labelsTextarea").value = formattedLabels;
@@ -166,43 +173,54 @@ function updateLabelsTextarea() {
 /**
  * Updates the query textarea with current query text
  */
-function updateQueryTextarea() {
+function updateQueryTextarea(error) {
+  if (error) return
   $("#queryTextarea").value = getGlobals("query") || "";
 }
 
 /**
  * Updates the footer text content
  */
-async function updateFooter() {
+async function updateFooter(error) {
+  if (error) return
     $("#footerText").innerHTML = CONFIG.FOOTER || "";
   }
 
 /**
  * Updates the info accordion content
  */
-async function updateInfoAccordion() {
+async function updateInfoAccordion(error) {
+  if (error) return
     $("#infoContent").innerHTML = getGlobals("info") || "";
 }
   
 /**
  * Updates the examples list content
  */
-async function updateExamplesList() {
+async function updateExamplesList(error) {
+  if (error) return
   $("#examplesContent").innerHTML = getGlobals("examples") || "";
 }
 
 function updateRawOutput(error) {
+  if (error) {
+    const data = getGlobals("error");
+    const template = Handlebars.compile($("#errorTemplate").innerHTML);
+    $$$('.explanation').forEach(i => i.style.display = "none");
+    $("#rawOutput").innerHTML = template(data);
+    $("#rawOutput").classList.add("error");
+  } else {
     const bindings = getGlobals("bindings");
     const rawOutput = JSON.stringify(bindings,null, 2) ;
     $("#rawOutput").textContent = bindings.length > 0 ? rawOutput : "";
-    $("#rawOutput").classList.toggle("error", error);
+    $("#rawOutput").classList.remove("error");
+  }
 }
-
 
 
 function updateBindingsTable(error) {
   if (error) {
-    let data = getGlobals("bindings");
+    let data = getGlobals("error");
     const template = Handlebars.compile($("#errorTemplate").innerHTML);
     $$$('.explanation').forEach(i => i.style.display = "none");
     $("#bindingsContent").innerHTML = template(data);
@@ -224,7 +242,7 @@ function updateBindingsTable(error) {
 
 function updateGroupedBindings(error) {
   if (error) {
-    let data = getGlobals("bindings");
+    let data = getGlobals("error");
     const template = Handlebars.compile($("#errorTemplate").innerHTML);
     $$$('.explanation').forEach(i => i.style.display = "none");
     $("#groupedBindingsContent").innerHTML = template(data);
@@ -321,8 +339,8 @@ function handleFilterSliderChange(e) {
  * @param {Object} config - Configuration object with renderStyle and/or filter properties
  */
 function updateSliders(config) {
-  const renderStyle = config.renderStyle ? config.renderStyle : getGlobals("renderStyle");
-  const filter = config.filter ? config.filter : getGlobals("filter");
+  const renderStyle = config?.renderStyle ? config.renderStyle : getGlobals("renderStyle");
+  const filter = config?.filter ? config.filter : getGlobals("filter");
 
   $("#groupedBindingsContent").className = "";
   $("#groupedBindingsContent").classList.add("filter"+filter, "render"+renderStyle);
