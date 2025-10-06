@@ -134,3 +134,40 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# ===== DEC VIEWER SPECIFIC EXCLUSIONS =====
+
+# Docker files - not needed in source repository
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Build artifacts and generated files
+*.tar
+*.tar.gz
+
+# Font files - use CDN instead
+public/fonts/
+*.ttf
+*.woff
+*.woff2
+*.otf
+
+# Lock files - let users generate their own
+package-lock.json
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
