@@ -1,21 +1,21 @@
 # DEC Viewer
 
-A web-based viewer for DEC (Disagreement, Epistemic, and Conjectural) reasoning data. This application provides an interactive interface for visualizing and querying RDF data with support for epistemic worlds, conjectural statements, and disagreement analysis.
+A web-based viewer for DEC (Doxastic, Epistemic, and Conjectural) reasoning. This application provides an interactive interface for visualizing and querying RDF data with support for doxastic, epistemic, and conjectural statements, and disagreement analysis.
 
 ## What is DEC Reasoning?
 
-DEC (Disagreement, Epistemic, and Conjectural) reasoning is a framework for representing and analyzing different types of knowledge and belief states:
+DEC (Doxastic, Epistemic, and Conjectural) reasoning is a framework for representing and analyzing different types of knowledge and belief states based on modal logic:
 
-- **Disagreement**: Representing conflicting viewpoints or contradictory information
-- **Epistemic**: Knowledge states and what agents know or believe  
-- **Conjectural**: Hypothetical or speculative information
+- **Doxastic worlds** represent agents' arbitrary viewpoints regardless of their alignment to actual facts;
+- **Epistemic worlds**: represent agents' knowledge, i.e., possibly partial, but factually correct viewpoints;  
+- **Conjectural worlds**: represent agents' hypothesis, i.e., extensions of actual facts that are currently neither true nor false, but are assumed to be for the purpose of the reasoning.  
 
 The DEC Viewer allows you to explore datasets that contain these different types of statements and their relationships.
 
 ## Features
 
 - Interactive SPARQL query interface
-- Visual representation of epistemic worlds and conjectural statements
+- Visual representation of doxastic, epistemic and conjectural worlds
 - Support for RDF-star (quoted triples)
 - Disagreement analysis and visualization
 - Customizable prefixes and labels
